@@ -1,4 +1,12 @@
 {
-  "name": "root",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "auto": "^11.3.6",
+    "prettier": "^3.7.4"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "tabWidth": 2,
+    "printWidth": 120
+  }
 }

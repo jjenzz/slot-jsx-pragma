@@ -1,0 +1,32 @@
+{
+  "name": "slot-jsx",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Custom JSX pragma for slottable components with asChild pattern. Import from framework-specific paths (e.g., slot-jsx/react).",
+  "exports": {
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
+    },
+    "./react/jsx-runtime": {
+      "types": "./dist/react/jsx-runtime.d.ts",
+      "default": "./dist/react/jsx-runtime.js"
+    },
+    "./react/jsx-dev-runtime": {
+      "types": "./dist/react/jsx-dev-runtime.d.ts",
+      "default": "./dist/react/jsx-dev-runtime.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.5",
+    "typescript": "~5.9.3"
+  }
+}
+
