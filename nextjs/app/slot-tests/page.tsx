@@ -312,69 +312,6 @@ export default function Page() {
             </Server.IconButtonNestedSlottable>
           </section>
         </div>
-
-        <div className="bg-red-950/50 rounded-lg shadow-lg shadow-zinc-950 p-8 mt-8 border border-red-900">
-          <h2 className="text-2xl font-bold text-red-400 mb-2">Error Cases</h2>
-          <p className="text-red-300 text-sm mb-6">
-            These should log errors to the console with a stack trace that indicates which component caused the error.
-          </p>
-
-          <div className="space-y-8">
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
-                Client.Button asChild with no children
-              </h3>
-              <Client.Button asChild className="bg-red-500" />
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
-                Client.Button asChild with text-only children
-              </h3>
-              <Client.Button asChild className="bg-red-500">
-                just text, no element
-              </Client.Button>
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
-                Client.Button asChild with multiple children (no Slottable)
-              </h3>
-              <Client.Button asChild className="bg-red-500">
-                <span className="text-zinc-400">First child</span>
-                <span className="text-zinc-400">Second child</span>
-              </Client.Button>
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
-                Client.ButtonSlottable asChild with multiple children (has Slottable but no single valid element)
-              </h3>
-              <Client.ButtonSlottable asChild className="bg-red-500">
-                <span className="text-zinc-400">First</span>
-                <span className="text-zinc-400">Second</span>
-              </Client.ButtonSlottable>
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
-                Server.Button asChild with no children
-              </h3>
-              <Server.Button asChild className="bg-red-500" />
-            </section>
-
-            <section className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
-                Server.Button asChild with mixed invalid content
-              </h3>
-              <Server.Button asChild className="bg-red-500">
-                text before
-                <span className="text-zinc-400">element</span>
-                text after
-              </Server.Button>
-            </section>
-          </div>
-        </div>
       </div>
     </main>
   );
