@@ -1,0 +1,40 @@
+name: Setup Repo
+description: Prepare and install everything for the repo
+
+inputs:
+  pnpm-version:
+    description: Version of pnpm to use
+    default: 8.x
+
+runs:
+  using: composite
+  steps:
+    - name: 🏗 Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ inputs.pnpm-version }}
+        run_install: false
+
+    - name: 🏗 Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        registry-url: ${{ env.REGISTRY_URL || 'https://registry.npmjs.org' }}
+        cache: pnpm
+
+    - name: 📦 Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: 📦 Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: 📦 Install dependencies
+      run: pnpm install
+      shell: bash
