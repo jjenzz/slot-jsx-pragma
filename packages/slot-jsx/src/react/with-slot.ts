@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Slot, Slottable } from './slot';
-import { findHostFromSlottable, replaceSlottableWithHostChildren, mergeProps } from './helpers';
+import { findAndReplaceSlottable, mergeProps } from './helpers';
 
 /**
  * Type definition for a JSX factory function.
@@ -87,28 +87,21 @@ function performSlotTransformation(props: any): SlotTransformationSuccess | null
       if (React.isValidElement(singleChild) && singleChild.type !== Slottable) {
         const hostElement = singleChild;
         const hostElementProps = hostElement.props as any;
-        const { children: hostChildren, ...hostProps } = hostElementProps;
-        const mergedProps = mergeProps(outerProps, hostProps);
-
-        return {
-          type: hostElement.type,
-          props: { ...mergedProps, children: hostChildren },
-        };
+        const mergedProps = mergeProps(outerProps, hostElementProps);
+        return { type: hostElement.type, props: mergedProps };
       } else {
         throw new Error(`Slot requires an element child to slot onto`);
       }
     }
 
     // Otherwise, try to find a Slottable in the children tree
-    const hostElement = findHostFromSlottable(children);
+    const { hostElement, transformedChildren } = findAndReplaceSlottable(children);
     const hostType = hostElement.type;
     const hostElementProps = hostElement.props as any;
-    const { children: hostChildren, ...hostProps } = hostElementProps;
-    const newChildren = replaceSlottableWithHostChildren(children, hostChildren);
-    const mergedProps = mergeProps(outerProps, hostProps);
+    const mergedProps = mergeProps(outerProps, hostElementProps);
     return {
       type: hostType,
-      props: { ...mergedProps, children: newChildren },
+      props: { ...mergedProps, children: transformedChildren },
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Slot transformation failed';
