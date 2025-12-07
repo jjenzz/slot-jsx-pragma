@@ -85,8 +85,8 @@ export function mergeProps(outerProps: Record<string, any>, hostProps: Record<st
       const outerHandler = outerProps[key];
       const hostHandler = hostProps[key];
       merged[key] = (...args: any[]) => {
-        outerHandler(...args);
         hostHandler(...args);
+        outerHandler(...args);
       };
     }
     // Otherwise, host props override outer props
