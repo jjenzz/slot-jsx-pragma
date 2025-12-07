@@ -61,14 +61,15 @@ export const ButtonNestedSlottable = ({
 };
 
 export const IconButtonNestedSlottable = ({ children, ...props }: React.ComponentProps<typeof Button>) => {
+  const Comp = props.asChild ? Slot : React.Fragment;
   return (
     <Button {...props}>
-      <Slot>
+      <Comp>
         <span>ICON</span>
         <b>
           bold <Slottable>{children}</Slottable>
         </b>
-      </Slot>
+      </Comp>
     </Button>
   );
 };
