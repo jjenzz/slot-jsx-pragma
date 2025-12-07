@@ -1,8 +1,19 @@
 {
   "name": "slot-jsx",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
-  "description": "Custom JSX pragma for slottable components with asChild pattern. Import from framework-specific paths (e.g., slot-jsx/react).",
+  "description": "Custom JSX pragma for slottable components with asChild pattern.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": "jjenzz/slot-jsx-pragma",
+  "author": "Jenna Smith <175330+jjenzz@users.noreply.github.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
   "exports": {
     "./react": {
       "types": "./dist/react/index.d.ts",
@@ -19,7 +30,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "cp ../../README.md ./README.md",
+    "postpublish": "rm ./README.md"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0"
@@ -29,4 +42,3 @@
     "typescript": "~5.9.3"
   }
 }
-
