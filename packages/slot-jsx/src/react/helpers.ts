@@ -2,76 +2,65 @@ import * as React from 'react';
 import { Slottable } from './slot';
 
 /**
- * Walks the children tree and finds the Slottable component.
- * Returns the child element contained within Slottable.
+ * Walks the children tree and finds the Slottable component in a single pass.
+ * Returns both the host element from within Slottable AND the transformed children
+ * with Slottable replaced by the host element's children.
  *
  * @throws if no Slottable is found
  * @throws if Slottable contains more than one child
  * @throws if child is not a valid React element
  */
-export function findHostFromSlottable(children: React.ReactNode): React.ReactElement {
-  let slottableChild: React.ReactNode = null;
-  let foundSlottable = false;
+export function findAndReplaceSlottable(children: React.ReactNode): {
+  hostElement: React.ReactElement;
+  transformedChildren: React.ReactNode;
+} {
+  let hostElement: React.ReactElement | null = null;
+  let hostChildren: React.ReactNode = null;
 
-  React.Children.forEach(children, (child) => {
-    if (foundSlottable) return;
+  const transform = (node: React.ReactNode): React.ReactNode => {
+    return React.Children.map(node, (child) => {
+      if (!React.isValidElement(child)) return child;
 
-    if (React.isValidElement(child)) {
-      const childProps = child.props as any;
+      // Found the Slottable - extract host and return its children
       if (child.type === Slottable) {
-        foundSlottable = true;
-        slottableChild = childProps.children;
-      } else if (childProps && typeof childProps === 'object' && 'children' in childProps) {
-        try {
-          const found = findHostFromSlottable(childProps.children);
-          slottableChild = found;
-          foundSlottable = true;
-        } catch {
-          // Continue searching if not found in this branch
-        }
-      }
-    }
-  });
+        if (hostElement) return hostChildren;
 
-  if (!foundSlottable) {
+        const slottableChild = (child.props as any).children;
+        const childArray = React.Children.toArray(slottableChild);
+
+        if (childArray.length !== 1) {
+          throw new Error('Slottable must contain exactly one child element');
+        }
+
+        const host = childArray[0];
+
+        if (!React.isValidElement(host)) {
+          throw new Error('Slottable child must be a valid React element');
+        }
+
+        hostElement = host;
+        hostChildren = (host.props as any).children;
+        return hostChildren;
+      }
+
+      // Recurse into children of other elements
+      const childProps = child.props as any;
+      if (childProps?.children) {
+        const newChildren = transform(childProps.children);
+        return React.createElement(child.type, childProps, newChildren);
+      }
+
+      return child;
+    });
+  };
+
+  const transformedChildren = transform(children);
+
+  if (!hostElement) {
     throw new Error('Slot component requires a Slottable child');
   }
 
-  const childArray = React.Children.toArray(slottableChild);
-
-  if (childArray.length !== 1) {
-    throw new Error('Slottable must contain exactly one child element');
-  }
-
-  const hostElement = childArray[0];
-
-  if (!React.isValidElement(hostElement)) {
-    throw new Error('Slottable child must be a valid React element');
-  }
-
-  return hostElement;
-}
-
-/**
- * Recursively walks through children and replaces Slottable with the host element's children.
- */
-export function replaceSlottableWithHostChildren(
-  children: React.ReactNode,
-  hostChildren: React.ReactNode,
-): React.ReactNode {
-  return React.Children.map(children, (child) => {
-    if (!React.isValidElement(child)) return child;
-    if (child.type === Slottable) return hostChildren;
-
-    const childProps = child.props as any;
-    if (childProps?.children) {
-      // For other elements with children, recursively process their children to find Slottable
-      const newChildren = replaceSlottableWithHostChildren(childProps.children, hostChildren);
-      return React.createElement(child.type, childProps, newChildren);
-    }
-
-    return child;
-  });
+  return { hostElement, transformedChildren };
 }
 
 /**
@@ -83,8 +72,6 @@ export function mergeProps(outerProps: Record<string, any>, hostProps: Record<st
 
   // Merge all host props except children
   for (const key in hostProps) {
-    if (key === 'children') continue;
-
     // Special handling for className - concatenate them
     if (key === 'className' && hostProps.className && outerProps.className) {
       merged.className = `${outerProps.className} ${hostProps.className}`;

@@ -31,5 +31,3 @@ export type { SlotProps, SlottableProps } from './slot';
 // Re-export utilities for advanced usage
 export { withSlot, withSlotJsxs, withSlotDev } from './with-slot';
 export type { JsxFactory, JsxDevFactory } from './with-slot';
-
-export { findHostFromSlottable, replaceSlottableWithHostChildren, mergeProps } from './helpers';
