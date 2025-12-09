@@ -2,12 +2,18 @@ import * as React from 'react';
 import { Slot, Slottable } from 'slot-jsx/react';
 import * as Client from './client';
 
-export const Link = ({ asChild = false, ...props }: React.ComponentProps<'a'> & { asChild?: boolean }) => {
+export const Link = ({
+  asChild = false,
+  ...props
+}: React.ComponentProps<'a'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : 'a';
   return <Comp {...props} />;
 };
 
-export const LinkSlottable = ({ asChild = false, ...props }: React.ComponentProps<'a'> & { asChild?: boolean }) => {
+export const LinkSlottable = ({
+  asChild = false,
+  ...props
+}: React.ComponentProps<'a'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : 'a';
   return (
     <Comp {...props}>
@@ -24,7 +30,10 @@ export const LinkButton = (props: React.ComponentProps<typeof Link>) => {
   );
 };
 
-export const Button = ({ asChild = false, ...props }: React.ComponentProps<'button'> & { asChild?: boolean }) => {
+export const Button = ({
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : 'button';
   return <Comp {...props} />;
 };
@@ -59,7 +68,10 @@ export const ButtonNestedSlottable = ({
   );
 };
 
-export const IconButtonNestedSlottable = ({ children, ...props }: React.ComponentProps<typeof Client.Button>) => {
+export const IconButtonNestedSlottable = ({
+  children,
+  ...props
+}: React.ComponentProps<typeof Client.Button>) => {
   const Comp = props.asChild ? Slot : React.Fragment;
   return (
     <Client.Button {...props}>

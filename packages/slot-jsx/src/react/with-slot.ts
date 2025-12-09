@@ -4,14 +4,9 @@ import { findAndReplaceSlottable, mergeProps } from './helpers';
 
 type Props = React.PropsWithChildren<React.RefAttributes<any>>;
 
-/**
- * Type definition for a JSX factory function.
- */
-export type JsxFactory = (type: React.ElementType<any, any>, props: Props, key?: string) => React.ReactElement;
-
-/**
- * Wraps a base JSX factory to add slotting capabilities.
- *
+/* -------------------------------------------------------------------------------------------------
+ * withSlot
+ * -------------------------------------------------------------------------------------------------
  * When the type is Slot, this performs the slotting transformation:
  * - If there's a single child that's not a Slottable, slots directly onto it
  * - Otherwise:
@@ -23,8 +18,15 @@ export type JsxFactory = (type: React.ElementType<any, any>, props: Props, key?:
  * - If slotting fails, logs error to console
  *
  * For all other types, delegates to the base JSX factory.
- */
-export function withSlot(baseJsx: JsxFactory): JsxFactory {
+ * -----------------------------------------------------------------------------------------------*/
+
+type JsxFactory = (
+  type: React.ElementType<any, any>,
+  props: Props,
+  key?: string,
+) => React.ReactElement;
+
+function withSlot(baseJsx: JsxFactory): JsxFactory {
   const jsx: JsxFactory = (type, props, key) => {
     if (type !== Slot) return baseJsx(type, props, key);
     const result = performSlotTransformation(props);
@@ -37,14 +39,18 @@ export function withSlot(baseJsx: JsxFactory): JsxFactory {
  * Wraps a base JSX factory for static children (jsxs).
  * Identical behavior to withSlot since the transformation is the same.
  */
-export function withSlotJsxs(baseJsxs: JsxFactory): JsxFactory {
+function withSlotJsxs(baseJsxs: JsxFactory): JsxFactory {
   return withSlot(baseJsxs);
 }
 
-/**
- * Type definition for the jsxDEV factory function used in development.
- */
-export type JsxDevFactory = (
+/* -------------------------------------------------------------------------------------------------
+ * withSlotDev
+ * -------------------------------------------------------------------------------------------------
+ * Wraps a base jsxDEV factory to add slotting capabilities in development mode.
+ * This is similar to withSlot but handles the additional parameters used by jsxDEV.
+ * -----------------------------------------------------------------------------------------------*/
+
+type JsxDevFactory = (
   type: React.ElementType,
   props: Props,
   key: React.Key | undefined,
@@ -57,7 +63,7 @@ export type JsxDevFactory = (
  * Wraps a base jsxDEV factory to add slotting capabilities in development mode.
  * This is similar to withSlot but handles the additional parameters used by jsxDEV.
  */
-export function withSlotDev(baseJsxDev: JsxDevFactory): JsxDevFactory {
+function withSlotDev(baseJsxDev: JsxDevFactory): JsxDevFactory {
   const jsxDEV: JsxDevFactory = (type, props, key, isStatic, source, self) => {
     if (type !== Slot) return baseJsxDev(type, props, key, isStatic, source, self);
     const result = performSlotTransformation(props);
@@ -69,7 +75,9 @@ export function withSlotDev(baseJsxDev: JsxDevFactory): JsxDevFactory {
   return jsxDEV;
 }
 
-/* ---------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------
+ * performSlotTransformation
+ * -----------------------------------------------------------------------------------------------*/
 
 type SlotTransformationResult = Pick<React.ReactElement<Props, any>, 'type' | 'props'>;
 
@@ -80,33 +88,36 @@ function performSlotTransformation(props: Props): SlotTransformationResult | nul
 
   try {
     if (childArray.length <= 1) {
-      // Check if we have a single child that's not a Slottable
-      if (React.isValidElement<React.PropsWithChildren>(singleChild) && singleChild.type !== Slottable) {
-        const hostElement = singleChild;
-        const hostElementProps = hostElement.props;
-        const hostElementRef = extractRef(hostElement);
-        const mergedProps = mergeProps(outerProps, { ...hostElementProps, ref: hostElementRef });
-        return { type: hostElement.type, props: mergedProps };
+      // check if we have a single child that's not a Slottable
+      if (React.isValidElement<Props>(singleChild) && singleChild.type !== Slottable) {
+        const ref = extractRef(singleChild);
+        const mergedProps = mergeProps(outerProps, { ...singleChild.props, ref });
+        return { type: singleChild.type, props: mergedProps };
       } else {
         throw new Error(`Slot requires an element child to slot onto`);
       }
     }
 
-    // Otherwise, try to find a Slottable in the children tree
-    const { hostElement, transformedChildren } = findAndReplaceSlottable(children);
-    const hostType = hostElement.type;
-    const hostElementProps = hostElement.props as Props;
-    const hostElementRef = extractRef(hostElement as React.ReactElement<Props>);
-    const mergedProps = mergeProps(outerProps, { ...hostElementProps, ref: hostElementRef });
-    const nextProps = { ...mergedProps, children: transformedChildren };
+    // otherwise, try to find a Slottable host in the tree
+    const host = findAndReplaceSlottable(children);
+    const ref = extractRef(host.element as React.ReactElement<Props>);
+    const mergedProps = mergeProps(outerProps, {
+      ...(host.element.props as Props),
+      children: host.children,
+      ref,
+    });
 
-    return { type: hostType, props: nextProps };
+    return { type: host.element.type, props: mergedProps };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Slot transformation failed';
     console.error(errorMessage);
     return null;
   }
 }
+
+/* -------------------------------------------------------------------------------------------------
+ * extractRef
+ * -----------------------------------------------------------------------------------------------*/
 
 function extractRef(element: React.ReactElement<Props>): React.Ref<any> | undefined {
   const majorVersion = parseInt(React.version.split('.')[0] || '0', 10);
@@ -115,3 +126,8 @@ function extractRef(element: React.ReactElement<Props>): React.Ref<any> | undefi
   // React 17-18 use element.ref
   return (element as any).ref;
 }
+
+/* ---------------------------------------------------------------------------------------------- */
+
+export type { JsxFactory, JsxDevFactory };
+export { withSlot, withSlotJsxs, withSlotDev };

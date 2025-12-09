@@ -12,7 +12,9 @@ export default function Page() {
 
         <div className="bg-zinc-900 rounded-lg shadow-lg shadow-zinc-950 p-8 space-y-8 border border-zinc-800">
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">Client.LinkButton</h2>
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.LinkButton
+            </h2>
             <Client.LinkButton
               href="/"
               className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
@@ -162,7 +164,9 @@ export default function Page() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">Server.LinkButton</h2>
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.LinkButton
+            </h2>
             <Server.LinkButton
               href="/"
               className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"

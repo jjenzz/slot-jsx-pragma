@@ -15,7 +15,7 @@
   },
   "prettier": {
     "singleQuote": true,
-    "printWidth": 120
+    "printWidth": 100
   },
   "engines": {
     "pnpm": ">= 9",

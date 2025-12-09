@@ -1,4 +1,3 @@
-import * as React from 'react';
 import * as Client from '@/components/client';
 import * as Server from '@/components/server';
 
@@ -9,8 +8,8 @@ export default function Page() {
         <div className="bg-zinc-900 rounded-lg shadow-lg shadow-zinc-950 p-8 mb-8 border border-zinc-800">
           <h1 className="text-3xl font-bold text-white mb-2">Slot Errors</h1>
           <p className="text-zinc-400 text-sm">
-            All components should log errors to the console with a stack trace that indicates which component caused the
-            error.
+            All components should log errors to the console with a stack trace that indicates which
+            component caused the error.
           </p>
         </div>
 
@@ -44,7 +43,8 @@ export default function Page() {
 
             <section className="space-y-3">
               <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
-                Client.ButtonSlottable asChild with multiple children (has Slottable but no single valid element)
+                Client.ButtonSlottable asChild with multiple children (has Slottable but no single
+                valid element)
               </h3>
               <Client.ButtonSlottable asChild className="bg-red-500">
                 <span className="text-zinc-400">First</span>
