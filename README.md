@@ -208,7 +208,7 @@ When slotting occurs, props are merged intelligently:
 
 ## Examples
 
-Check out the [demo app](https://github.com/jjenzz/slot-jsx/tree/main/nextjs) for working examples.
+Check out the [demo app](https://github.com/jjenzz/slot-jsx-pragma/tree/main/apps/nextjs) for working examples.
 
 ## Inspiration
 
