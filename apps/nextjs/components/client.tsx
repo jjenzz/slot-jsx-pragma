@@ -2,10 +2,13 @@
 
 import * as React from 'react';
 import { Slot, Slottable } from 'slot-jsx/react';
+import mergeRefs from 'merge-refs';
 
 export const Link = ({ asChild = false, ...props }: React.ComponentProps<'a'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : 'a';
-  return <Comp {...props} />;
+  const ref = React.useRef<HTMLAnchorElement>(null);
+  const mergedRefs = mergeRefs(props.ref, ref);
+  return <Comp {...props} ref={mergedRefs} />;
 };
 
 export const LinkSlottable = ({ asChild = false, ...props }: React.ComponentProps<'a'> & { asChild?: boolean }) => {
@@ -18,16 +21,21 @@ export const LinkSlottable = ({ asChild = false, ...props }: React.ComponentProp
 };
 
 export const LinkButton = (props: React.ComponentProps<typeof Link>) => {
+  const anchorRef = React.useRef<HTMLAnchorElement>(null);
   return (
     <Button asChild>
-      <Link {...props}>{props.children}</Link>
+      <Link {...props} ref={anchorRef}>
+        {props.children}
+      </Link>
     </Button>
   );
 };
 
 export const Button = ({ asChild = false, ...props }: React.ComponentProps<'button'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : 'button';
-  return <Comp {...props} />;
+  const ref = React.useRef<HTMLButtonElement>(null);
+  const mergedRefs = mergeRefs(props.ref, ref);
+  return <Comp {...props} ref={mergedRefs} />;
 };
 
 export const ButtonSlottable = ({

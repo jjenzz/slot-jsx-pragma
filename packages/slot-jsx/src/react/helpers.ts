@@ -72,28 +72,44 @@ export function mergeProps(outerProps: Record<string, any>, hostProps: Record<st
 
   // Merge all host props except children
   for (const key in hostProps) {
-    // Special handling for className - concatenate them
-    if (key === 'className' && hostProps.className && outerProps.className) {
+    if (key === 'ref') {
+      merged.ref = mergeRefs(outerProps.ref, hostProps.ref);
+    } else if (key === 'className' && hostProps.className && outerProps.className) {
       merged.className = `${outerProps.className} ${hostProps.className}`;
-    }
-    // Special handling for style - merge objects
-    else if (key === 'style' && typeof outerProps.style === 'object' && typeof hostProps.style === 'object') {
+    } else if (key === 'style' && typeof outerProps.style === 'object' && typeof hostProps.style === 'object') {
       merged.style = { ...outerProps.style, ...hostProps.style };
-    }
-    // For event handlers, call both
-    else if (key.startsWith('on') && typeof outerProps[key] === 'function' && typeof hostProps[key] === 'function') {
+    } else if (key.startsWith('on') && typeof outerProps[key] === 'function' && typeof hostProps[key] === 'function') {
       const outerHandler = outerProps[key];
       const hostHandler = hostProps[key];
       merged[key] = (...args: any[]) => {
         hostHandler(...args);
         outerHandler(...args);
       };
-    }
-    // Otherwise, host props override outer props
-    else {
+    } else {
       merged[key] = hostProps[key];
     }
   }
 
   return merged;
+}
+
+/**
+ * Composes multiple refs into a single ref callback.
+ */
+function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>): React.Ref<T> | undefined {
+  const validRefs = refs.filter((ref) => ref != null);
+  const count = validRefs.length;
+
+  if (count === 0) return undefined;
+  if (count === 1) return validRefs[0];
+
+  return function mergedRefs(value: T | null) {
+    for (const ref of validRefs) {
+      if (typeof ref === 'function') {
+        ref(value);
+      } else if (ref) {
+        ref.current = value;
+      }
+    }
+  };
 }

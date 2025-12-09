@@ -1,4 +1,3 @@
-import * as React from 'react';
 import * as Client from '@/components/client';
 import * as Server from '@/components/server';
 

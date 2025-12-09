@@ -4,6 +4,7 @@
   "repository": "jjenzz/slot-jsx-pragma",
   "author": "Jenna Smith <175330+jjenzz@users.noreply.github.com>",
   "scripts": {
+    "postinstall": "pnpm build",
     "build": "pnpm --filter=\"slot-jsx\" build",
     "release": "auto shipit"
   },
@@ -19,6 +20,11 @@
   "engines": {
     "pnpm": ">= 8",
     "node": ">= 22"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19"
+    }
   },
   "auto": {
     "noDefaultLabels": true,

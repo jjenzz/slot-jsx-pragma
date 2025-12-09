@@ -11,10 +11,12 @@ interface SlotProps extends React.HTMLAttributes<HTMLElement> {
 /**
  * Slot marker component. This is a runtime no-op that acts as an identity marker
  * for the JSX pragma to intercept and perform slotting transformation.
+ *
+ * we must specify `_forwardRef` here to avoid consle errors in dev mode for older versions of React
  */
-function Slot(props: SlotProps) {
+const Slot = React.forwardRef<HTMLElement, SlotProps>((props, _forwardedRef) => {
   return <>{props.children}</>;
-}
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Slottable
