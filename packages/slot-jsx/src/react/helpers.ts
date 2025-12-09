@@ -14,40 +14,36 @@ export function findAndReplaceSlottable(children: React.ReactNode): {
   hostElement: React.ReactElement;
   transformedChildren: React.ReactNode;
 } {
-  let hostElement: React.ReactElement | null = null;
+  let hostElement: React.ReactElement<React.PropsWithChildren> | null = null;
   let hostChildren: React.ReactNode = null;
 
   const transform = (node: React.ReactNode): React.ReactNode => {
     return React.Children.map(node, (child) => {
-      if (!React.isValidElement(child)) return child;
+      if (!React.isValidElement<React.PropsWithChildren>(child)) return child;
 
       // Found the Slottable - extract host and return its children
       if (child.type === Slottable) {
-        if (hostElement) return hostChildren;
-
-        const slottableChild = (child.props as any).children;
+        const slottableChild = child.props.children;
         const childArray = React.Children.toArray(slottableChild);
+        const host = childArray[0];
 
         if (childArray.length !== 1) {
           throw new Error('Slottable must contain exactly one child element');
         }
 
-        const host = childArray[0];
-
-        if (!React.isValidElement(host)) {
+        if (!React.isValidElement<React.PropsWithChildren>(host)) {
           throw new Error('Slottable child must be a valid React element');
         }
 
         hostElement = host;
-        hostChildren = (host.props as any).children;
+        hostChildren = host.props.children;
         return hostChildren;
       }
 
       // Recurse into children of other elements
-      const childProps = child.props as any;
-      if (childProps?.children) {
-        const newChildren = transform(childProps.children);
-        return React.createElement(child.type, childProps, newChildren);
+      if (child.props.children) {
+        const newChildren = transform(child.props.children);
+        return React.createElement(child.type, child.props, newChildren);
       }
 
       return child;
@@ -70,7 +66,6 @@ export function findAndReplaceSlottable(children: React.ReactNode): {
 export function mergeProps(outerProps: Record<string, any>, hostProps: Record<string, any>): Record<string, any> {
   const merged = { ...outerProps };
 
-  // Merge all host props except children
   for (const key in hostProps) {
     if (key === 'ref') {
       merged.ref = mergeRefs(outerProps.ref, hostProps.ref);
