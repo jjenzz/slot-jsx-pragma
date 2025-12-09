@@ -87,7 +87,8 @@ function performSlotTransformation(props: any): SlotTransformationSuccess | null
       if (React.isValidElement(singleChild) && singleChild.type !== Slottable) {
         const hostElement = singleChild;
         const hostElementProps = hostElement.props as any;
-        const mergedProps = mergeProps(outerProps, hostElementProps);
+        const hostElementRef = extractRef(hostElement);
+        const mergedProps = mergeProps(outerProps, { ...hostElementProps, ref: hostElementRef });
         return { type: hostElement.type, props: mergedProps };
       } else {
         throw new Error(`Slot requires an element child to slot onto`);
@@ -98,7 +99,8 @@ function performSlotTransformation(props: any): SlotTransformationSuccess | null
     const { hostElement, transformedChildren } = findAndReplaceSlottable(children);
     const hostType = hostElement.type;
     const hostElementProps = hostElement.props as any;
-    const mergedProps = mergeProps(outerProps, hostElementProps);
+    const hostElementRef = extractRef(hostElement);
+    const mergedProps = mergeProps(outerProps, { ...hostElementProps, ref: hostElementRef });
     return {
       type: hostType,
       props: { ...mergedProps, children: transformedChildren },
@@ -108,4 +110,12 @@ function performSlotTransformation(props: any): SlotTransformationSuccess | null
     console.error(errorMessage);
     return null;
   }
+}
+
+function extractRef(element: React.ReactElement) {
+  const majorVersion = parseInt(React.version.split('.')[0] || '0', 10);
+  // React 19+ uses props.ref
+  if (majorVersion >= 19) return (element.props as any).ref;
+  // React 17-18 use element.ref
+  return (element as any).ref;
 }
