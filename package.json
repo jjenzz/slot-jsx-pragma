@@ -18,7 +18,7 @@
     "printWidth": 120
   },
   "engines": {
-    "pnpm": ">= 8",
+    "pnpm": ">= 9",
     "node": ">= 22"
   },
   "pnpm": {
