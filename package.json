@@ -65,14 +65,14 @@
         "name": "changelog: chore",
         "changelogTitle": "🏠 Housekeeping",
         "description": "Add chore to changelog when merged, no versioning required",
-        "releaseType": "none",
+        "releaseType": "patch",
         "color": "#696969"
       },
       {
         "name": "changelog: docs",
         "changelogTitle": "📝 Documentation",
         "description": "Add docs to changelog when merged, no versioning required",
-        "releaseType": "none",
+        "releaseType": "patch",
         "color": "#cfd3d7"
       },
       {
