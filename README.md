@@ -137,48 +137,49 @@ export function Button({ render, ...props }) {
 **Usage:**
 
 ```tsx
-<Button render={<a href="/foo"/>}>
-  Click me
-</Button>
+<Button render={<a href="/foo" />}>Click me</Button>
+```
 
-// or
+or:
 
-<Button render={props => <a {...props} href="/foo"/>}>
-  Click me
-</Button>
+```tsx
+<Button render={(props) => <a {...props} href="/foo" />}>Click me</Button>
 ```
 
 This pattern gives consumers full control over the rendered element while still merging props and preserving the slot mechanics.
 
-## Composing JSX Pragmas
+## Ejecting JSX Pragmas
 
-You can compose `withSlot` with other custom JSX pragmas for styling or other transformations.
+You can eject the pragma to configure it, or compose it with other custom pragmas for styling or other transformations.
 
-### Example: Composing with CSS Pragmas
+To eject, create your own custom JSX runtime files in your project:
 
-Create custom JSX runtime files in your project:
-
-**jsx-runtime.ts:**
+**src/jsx-runtime/jsx-runtime.ts:**
 
 ```tsx
 import { jsx as baseJsx, jsxs as baseJsxs, Fragment } from 'react/jsx-runtime';
-import { withSlot } from 'slot-jsx/react';
-import { withCss } from '@some-lib/css-pragma';
+import { withSlot, withSlotJsxs, Options } from 'slot-jsx/react';
+import { withCss, withCssJsxs } from '@some-lib/css-pragma';
 
-export const jsx = withCss(withSlot(baseJsx));
-export const jsxs = withCss(withSlot(baseJsxs));
-export { jsxDEV } from './jsx-dev-runtime';
+// optionally define your own custom merge props behaviour
+export const mergeProps: Options['mergeProps'] = (outerProps, hostProps) => {
+  return { ...outerProps, ...hostProps };
+};
+
+export const jsx = withCss(withSlot(baseJsx, { mergeProps }));
+export const jsxs = withCssJsxs(withSlotJsxs(baseJsxs, { mergeProps }));
 export { Fragment };
 ```
 
-**jsx-dev-runtime.ts:**
+**src/jsx-runtime/jsx-dev-runtime.ts:**
 
 ```tsx
 import { jsxDEV as baseJsxDEV, Fragment } from 'react/jsx-dev-runtime';
 import { withSlotDev } from 'slot-jsx/react';
 import { withCssDev } from '@some-lib/css-pragma';
+import { mergeProps } from './jsx-runtime';
 
-export const jsxDEV = withCssDev(withSlotDev(baseJsxDEV));
+export const jsxDEV = withCssDev(withSlotDev(baseJsxDEV, { mergeProps }));
 export { Fragment };
 ```
 
@@ -192,7 +193,7 @@ Update your `tsconfig.json`:
 }
 ```
 
-> **Important:** Create both runtime files and make sure `jsx-runtime.ts` re-exports `jsxDEV` from `jsx-dev-runtime.ts` to avoid errors in development mode.
+> **Important:** Use `"jsxImportSource": "@/jsx-runtime"` in NextJS projects.
 
 ### Prop Merging
 

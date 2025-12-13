@@ -3,6 +3,7 @@ import { Slot, Slottable } from './slot';
 import { findAndReplaceSlottable, mergeProps } from './helpers';
 
 type Props = React.PropsWithChildren<React.RefAttributes<any>>;
+type Options = { mergeProps?: typeof mergeProps };
 
 /* -------------------------------------------------------------------------------------------------
  * withSlot
@@ -26,10 +27,10 @@ type JsxFactory = (
   key?: string,
 ) => React.ReactElement;
 
-function withSlot(baseJsx: JsxFactory): JsxFactory {
+function withSlot(baseJsx: JsxFactory, options?: Options): JsxFactory {
   const jsx: JsxFactory = (type, props, key) => {
     if (type !== Slot) return baseJsx(type, props, key);
-    const result = performSlotTransformation(props);
+    const result = performSlotTransformation(props, options);
     return result ? baseJsx(result.type, result.props, key) : baseJsx(Slot, props, key);
   };
   return jsx;
@@ -39,8 +40,8 @@ function withSlot(baseJsx: JsxFactory): JsxFactory {
  * Wraps a base JSX factory for static children (jsxs).
  * Identical behavior to withSlot since the transformation is the same.
  */
-function withSlotJsxs(baseJsxs: JsxFactory): JsxFactory {
-  return withSlot(baseJsxs);
+function withSlotJsxs(baseJsxs: JsxFactory, options?: Options): JsxFactory {
+  return withSlot(baseJsxs, options);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -63,10 +64,10 @@ type JsxDevFactory = (
  * Wraps a base jsxDEV factory to add slotting capabilities in development mode.
  * This is similar to withSlot but handles the additional parameters used by jsxDEV.
  */
-function withSlotDev(baseJsxDev: JsxDevFactory): JsxDevFactory {
+function withSlotDev(baseJsxDev: JsxDevFactory, options?: Options): JsxDevFactory {
   const jsxDEV: JsxDevFactory = (type, props, key, isStatic, source, self) => {
     if (type !== Slot) return baseJsxDev(type, props, key, isStatic, source, self);
-    const result = performSlotTransformation(props);
+    const result = performSlotTransformation(props, options);
 
     return result
       ? baseJsxDev(result.type, result.props, key, isStatic, source, self)
@@ -81,10 +82,14 @@ function withSlotDev(baseJsxDev: JsxDevFactory): JsxDevFactory {
 
 type SlotTransformationResult = Pick<React.ReactElement<Props, any>, 'type' | 'props'>;
 
-function performSlotTransformation(props: Props): SlotTransformationResult | null {
+function performSlotTransformation(
+  props: Props,
+  options: Options = {},
+): SlotTransformationResult | null {
   const { children, ...outerProps } = props;
   const childArray = React.Children.toArray(children);
   const singleChild = childArray[0];
+  const mergePropsFn = options.mergeProps ?? mergeProps;
 
   try {
     if (childArray.length <= 1) {
@@ -92,7 +97,7 @@ function performSlotTransformation(props: Props): SlotTransformationResult | nul
       if (React.isValidElement<Props>(singleChild)) {
         if (singleChild.type !== Slottable) {
           const ref = extractRef(singleChild);
-          const mergedProps = mergeProps(outerProps, { ...singleChild.props, ref });
+          const mergedProps = mergePropsFn(outerProps, { ...singleChild.props, ref });
           return { type: singleChild.type, props: mergedProps };
         }
       } else {
@@ -103,7 +108,7 @@ function performSlotTransformation(props: Props): SlotTransformationResult | nul
     // otherwise, try to find a Slottable host in the tree
     const host = findAndReplaceSlottable(children);
     const ref = extractRef(host.element as React.ReactElement<Props>);
-    const mergedProps = mergeProps(outerProps, {
+    const mergedProps = mergePropsFn(outerProps, {
       ...(host.element.props as Props),
       children: host.children,
       ref,
@@ -131,5 +136,5 @@ function extractRef(element: React.ReactElement<Props>): React.Ref<any> | undefi
 
 /* ---------------------------------------------------------------------------------------------- */
 
-export type { JsxFactory, JsxDevFactory };
+export type { JsxFactory, JsxDevFactory, Options };
 export { withSlot, withSlotJsxs, withSlotDev };

@@ -6,6 +6,12 @@
  * so we export it from the dev runtime.
  */
 
-export { jsx, jsxs, Fragment } from './index';
-export { jsxDEV } from './jsx-dev-runtime';
-export type { JSX } from './index';
+import { jsx as baseJsx, jsxs as baseJsxs, Fragment } from 'react/jsx-runtime';
+import { withSlot, withSlotJsxs } from './with-slot';
+
+export const jsx = withSlot(baseJsx);
+export const jsxs = withSlotJsxs(baseJsxs);
+export { Fragment };
+
+// Re-export the JSX namespace for TypeScript
+export type { JSX } from 'react/jsx-runtime';
