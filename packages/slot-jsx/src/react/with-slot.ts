@@ -106,14 +106,10 @@ function performSlotTransformation(
     }
 
     // otherwise, try to find a Slottable host in the tree
-    const host = findAndReplaceSlottable(children);
+    const host = findAndReplaceSlottable(outerProps, children);
     const ref = extractRef(host.element as React.ReactElement<Props>);
-    const mergedProps = mergePropsFn(outerProps, {
-      ...(host.element.props as Props),
-      children: host.children,
-      ref,
-    });
-
+    const hostProps = { ...(host.element.props as Props), children: host.children, ref };
+    const mergedProps = host.isAsFunctionProp ? hostProps : mergePropsFn(outerProps, hostProps);
     return { type: host.element.type, props: mergedProps };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Slot transformation failed';

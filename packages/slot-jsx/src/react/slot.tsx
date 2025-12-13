@@ -24,7 +24,7 @@ const Slot = React.forwardRef<HTMLElement, SlotProps>((props, _forwardedRef) => 
  * -----------------------------------------------------------------------------------------------*/
 
 interface SlottableProps {
-  as?: React.ReactElement;
+  as?: React.ReactElement | ((...args: any[]) => React.ReactElement);
   children?: React.ReactNode;
 }
 

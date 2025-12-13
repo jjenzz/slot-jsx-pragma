@@ -10,12 +10,17 @@ import { Slottable, SlottableProps } from './slot';
  * @throws if Slottable contains more than one child
  * @throws if child is not a valid React element
  */
-function findAndReplaceSlottable(children: React.ReactNode): {
+function findAndReplaceSlottable(
+  outerProps: Record<string, any>,
+  children: React.ReactNode,
+): {
   element: React.ReactElement;
   children: React.ReactNode;
+  isAsFunctionProp: boolean;
 } {
   let hostElement: React.ReactElement<React.PropsWithChildren> | null = null;
   let hostChildren: React.ReactNode = null;
+  let isAsFunctionProp = false;
 
   const transform = (node: React.ReactNode): React.ReactNode => {
     return React.Children.map(node, (child) => {
@@ -25,7 +30,9 @@ function findAndReplaceSlottable(children: React.ReactNode): {
       if (child.type === Slottable) {
         const slottableProps = child.props as SlottableProps;
         const slottableChild = slottableProps.as ?? slottableProps.children;
-        const childArray = React.Children.toArray(slottableChild);
+        const isFn = typeof slottableChild === 'function';
+        const slottable = isFn ? slottableChild(outerProps) : slottableChild;
+        const childArray = React.Children.toArray(slottable);
         const host = childArray[0];
 
         if (childArray.length !== 1) {
@@ -38,6 +45,7 @@ function findAndReplaceSlottable(children: React.ReactNode): {
 
         hostElement = host;
         hostChildren = slottableProps.as ? slottableProps.children : host.props.children;
+        isAsFunctionProp = isFn;
         return hostChildren;
       }
 
@@ -57,7 +65,7 @@ function findAndReplaceSlottable(children: React.ReactNode): {
     throw new Error('Slot component requires a Slottable child');
   }
 
-  return { element: hostElement, children: transformedChildren };
+  return { element: hostElement, children: transformedChildren, isAsFunctionProp };
 }
 
 /**

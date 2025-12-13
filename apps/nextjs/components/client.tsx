@@ -104,11 +104,7 @@ export const ButtonRender = ({ render, ...props }: ButtonRenderProps) => {
   const Comp = render ? Slot : 'button';
   return (
     <Comp {...props}>
-      {typeof render === 'function' ? (
-        render(props)
-      ) : (
-        <Slottable as={render}>{props.children}</Slottable>
-      )}
+      <Slottable as={render}>{props.children}</Slottable>
     </Comp>
   );
 };

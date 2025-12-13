@@ -124,11 +124,7 @@ export function Button({ render, ...props }) {
   const Comp = render ? Slot : 'button';
   return (
     <Comp {...props}>
-      {typeof render === 'function' ? (
-        render(props)
-      ) : (
-        <Slottable as={render}>{props.children}</Slottable>
-      )}
+      <Slottable as={render}>{props.children}</Slottable>
     </Comp>
   );
 }
@@ -146,7 +142,7 @@ or:
 <Button render={(props) => <a {...props} href="/foo" />}>Click me</Button>
 ```
 
-This pattern gives consumers full control over the rendered element while still merging props and preserving the slot mechanics.
+This pattern gives consumers full control over the rendered element while still preserving the slot mechanics. When using the function pattern, `Slot` will no longer merge props for you to give you control over prop forwarding and composition.
 
 ## Ejecting JSX Pragmas
 
