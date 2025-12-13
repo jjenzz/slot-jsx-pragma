@@ -115,7 +115,7 @@ export function Button({ asChild, children, ...props }) {
 
 ### With Render Prop
 
-If you want to define an API where you pass a _render prop_ to specify the underlying element—like [Ariakit](https://ariakit.org/guide/composition) or [BaseUI](https://base-ui.com/react/handbook/composition#render-function)—use the `as` prop on `Slottable`.
+If you want to define an API where you pass a _render prop_ to specify the underlying element—like [Ariakit](https://ariakit.org/guide/composition) or [Base UI](https://base-ui.com/react/handbook/composition#render-function)—use the `as` prop on `Slottable`.
 
 **Example:**
 
