@@ -1,17 +1,16 @@
 # 🎰 slot-jsx
 
-A custom JSX pragma that enables declarative nested slottable components using the `asChild` pattern, inspired by Radix UI.
+A custom JSX pragma that enables declarative slottable components for powering `asChild` or `render` function prop patterns.
 
 ## Features
 
-- ✅ **Custom JSX Runtime**: Transforms JSX at runtime to support slotting
-- ✅ **Composable**: Can be composed with other JSX pragmas
-- ✅ **Nested Slottables**: Supports deeply nested slottable components
-- ✅ **Type-Safe**: Full TypeScript support
-- ✅ **No `React.cloneElement`**: Uses a safe element reconstruction approach
-- ✅ **Async Components**: Can slot onto async server components
-- ✅ **React Server Components**: Fully compatible with RSC and SSR
-- ✅ **React 17+**: Requires React 17+ for the new JSX transform
+- 🪆 **Nested Slottables**: Supports deeply nested slottable components
+- 🔥 **No `React.cloneElement`**: Uses a safe element reconstruction approach
+- ✨ **React Server Components**: Fully compatible with RSC and SSR
+- ⏳ **Async Components**: Can slot onto async server components
+- 🧹 **Streamlined React tree**: No more [`SlotClone` components](https://github.com/radix-ui/primitives/blob/main/packages/react/slot/src/slot.tsx#L101) in devtools
+- 🧩 **Composable**: Can be composed with other JSX pragmas
+- 🛡️ **Type-Safe**: Full TypeScript support
 
 ## Installation
 
@@ -49,17 +48,11 @@ export function Button({ asChild, children, ...props }: ButtonProps) {
 }
 ```
 
-> **Note:** The prop name `asChild` is a convention from Radix UI, but you can name it whatever you want (`polymorphic`, `as`, `renderAs`, etc.). We use `asChild` in our examples as it's widely recognised.
+> **Note:** The prop name `asChild` is a convention from Radix UI, but you can name it whatever you want.
 
 ### 2. Use It
 
 ```tsx
-// Regular button
-<Button onClick={() => console.log('clicked')}>
-  Click me
-</Button>
-
-// As a link
 <Button asChild>
   <a href="/home">Go Home</a>
 </Button>
@@ -78,7 +71,7 @@ When `asChild={true}`, the component's root element is replaced by its child ele
   <a href="/foo">Click me</a>
 </Button>
 
-// Renders: <a href="/foo" onClick={handleClick}>Click me</a>
+// Result: <a href="/foo" onClick={handleClick}>Click me</a>
 ```
 
 ### Complex Case (With Slottable)
@@ -111,7 +104,7 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
 </a>
 ```
 
-**Without siblings?** You can skip `Slottable`:
+**Without siblings?** Skip `Slottable`:
 
 ```tsx
 export function Button({ asChild, children, ...props }) {
@@ -120,7 +113,44 @@ export function Button({ asChild, children, ...props }) {
 }
 ```
 
-## Composing with Other JSX Pragmas
+### With Render Prop
+
+If you want to define an API where you pass a _render prop_ to specify the underlying element—like [Ariakit](https://ariakit.org/guide/composition) or [BaseUI](https://base-ui.com/react/handbook/composition#render-function)—use the `as` prop on `Slottable`.
+
+**Example:**
+
+```tsx
+export function Button({ render, ...props }) {
+  const Comp = render ? Slot : 'button';
+  return (
+    <Comp {...props}>
+      {typeof render === 'function' ? (
+        render(props)
+      ) : (
+        <Slottable as={render}>{props.children}</Slottable>
+      )}
+    </Comp>
+  );
+}
+```
+
+**Usage:**
+
+```tsx
+<Button render={<a href="/foo"/>}>
+  Click me
+</Button>
+
+// or
+
+<Button render={props => <a {...props} href="/foo"/>}>
+  Click me
+</Button>
+```
+
+This pattern gives consumers full control over the rendered element while still merging props and preserving the slot mechanics.
+
+## Composing JSX Pragmas
 
 You can compose `withSlot` with other custom JSX pragmas for styling or other transformations.
 
@@ -135,13 +165,10 @@ import { jsx as baseJsx, jsxs as baseJsxs, Fragment } from 'react/jsx-runtime';
 import { withSlot } from 'slot-jsx/react';
 import { withCss } from '@some-lib/css-pragma';
 
-// Compose pragmas - styling wraps slotting
 export const jsx = withCss(withSlot(baseJsx));
 export const jsxs = withCss(withSlot(baseJsxs));
-export { Fragment };
-
-// Re-export jsxDEV from dev runtime for development mode
 export { jsxDEV } from './jsx-dev-runtime';
+export { Fragment };
 ```
 
 **jsx-dev-runtime.ts:**
@@ -151,7 +178,6 @@ import { jsxDEV as baseJsxDEV, Fragment } from 'react/jsx-dev-runtime';
 import { withSlotDev } from 'slot-jsx/react';
 import { withCssDev } from '@some-lib/css-pragma';
 
-// Compose dev pragmas
 export const jsxDEV = withCssDev(withSlotDev(baseJsxDEV));
 export { Fragment };
 ```
@@ -168,43 +194,22 @@ Update your `tsconfig.json`:
 
 > **Important:** Create both runtime files and make sure `jsx-runtime.ts` re-exports `jsxDEV` from `jsx-dev-runtime.ts` to avoid errors in development mode.
 
-## API
-
-### `Slot`
-
-Marker component that enables slotting. When `asChild={true}`, this replaces the component's root.
-
-```tsx
-interface SlotProps extends React.HTMLAttributes<HTMLElement> {
-  children?: React.ReactNode;
-}
-```
-
-### `Slottable`
-
-Marks where the host element's children will be inserted.
-
-```tsx
-interface SlottableProps {
-  children?: React.ReactNode;
-}
-```
-
 ### Prop Merging
 
 When slotting occurs, props are merged intelligently:
 
 - **className**: Concatenates both classes
 - **style**: Merges style objects (host wins on conflicts)
+- **ref**: Safely composes both refs (React 17+)
 - **Event handlers**: Calls both handlers in sequence
 - **Other props**: Host props take precedence
 
 ## Rules & Edge Cases
 
-1. **Slottable is optional**: If you don't have siblings to the children, you don't need `Slottable`
+1. **Slottable is optional**: If you don't have wrappers or siblings to the children, you don't need `Slottable`
 2. **Single Slottable**: Only one `Slottable` per `Slot` (if you use it)
 3. **Single Host Element**: The child you're slotting onto must be exactly one React element
-4. **Prop Merging**: Host props override component props (except for className, style, and event handlers)
+4. **Prop Merging**: Host props override component props (except for className, style, ref, and event handlers)
 
 ## Examples
 
@@ -213,7 +218,3 @@ Check out the [demo app](https://github.com/jjenzz/slot-jsx-pragma/tree/main/app
 ## Inspiration
 
 This implementation is inspired by [Radix UI's Slot utility](https://www.radix-ui.com/primitives/docs/utilities/slot).
-
-## License
-
-MIT

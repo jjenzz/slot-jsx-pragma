@@ -4,8 +4,8 @@ import * as Server from '@/components/server';
 export default function Page() {
   return (
     <main className="min-h-screen bg-black py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-zinc-900 rounded-lg shadow-lg shadow-zinc-950 p-8 mb-8 border border-zinc-800">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="bg-zinc-900 rounded-lg shadow-lg shadow-zinc-950 p-8 border border-zinc-800">
           <h1 className="text-3xl font-bold text-white mb-2">Slot Tests</h1>
           <p className="text-zinc-400 text-sm">All components should be rendered as links</p>
         </div>
@@ -313,6 +313,79 @@ export default function Page() {
                 children
               </Client.Link>
             </Server.IconButtonNestedSlottable>
+          </section>
+        </div>
+
+        <div className="bg-zinc-900 rounded-lg shadow-lg shadow-zinc-950 p-8 space-y-8 border border-zinc-800">
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonRender rendered as Client.Link element
+            </h2>
+            <Client.ButtonRender
+              render={
+                <Client.Link
+                  href="/"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              }
+            >
+              children
+            </Client.ButtonRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonRender rendered as Server.Link element
+            </h2>
+            <Client.ButtonRender
+              render={
+                <Server.Link
+                  href="/"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              }
+            >
+              children
+            </Client.ButtonRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonRender rendered as Client.Link element
+            </h2>
+            <Server.ButtonRender
+              render={
+                <Client.Link
+                  href="/"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              }
+            >
+              children
+            </Server.ButtonRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonRender rendered as Server.Link element
+            </h2>
+            <Server.ButtonRender
+              render={
+                <Server.Link
+                  href="/"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              }
+            >
+              children
+            </Server.ButtonRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonRenderProp render function as Client.Link
+            </h2>
+            <Client.ButtonRenderProp>children</Client.ButtonRenderProp>
           </section>
         </div>
       </div>

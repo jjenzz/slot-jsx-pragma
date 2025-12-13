@@ -94,3 +94,36 @@ export const IconButtonNestedSlottable = ({
     </Button>
   );
 };
+
+// IRL this would be typed correctly but we're just testing functionality here
+interface ButtonRenderProps extends React.ComponentProps<'button'> {
+  render?: React.ReactElement | ((props: any) => React.ReactElement);
+}
+
+export const ButtonRender = ({ render, ...props }: ButtonRenderProps) => {
+  const Comp = render ? Slot : 'button';
+  return (
+    <Comp {...props}>
+      {typeof render === 'function' ? (
+        render(props)
+      ) : (
+        <Slottable as={render}>{props.children}</Slottable>
+      )}
+    </Comp>
+  );
+};
+
+export const ButtonRenderProp = (props: React.ComponentProps<typeof ButtonRender>) => {
+  return (
+    <ButtonRender
+      {...props}
+      render={(props) => (
+        <Link
+          href="/"
+          {...props}
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+        />
+      )}
+    />
+  );
+};

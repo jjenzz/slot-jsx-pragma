@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Slottable } from './slot';
+import { Slottable, SlottableProps } from './slot';
 
 /**
  * Walks the children tree and finds the Slottable component in a single pass.
@@ -23,7 +23,8 @@ function findAndReplaceSlottable(children: React.ReactNode): {
 
       // Found the Slottable - extract host and return its children
       if (child.type === Slottable) {
-        const slottableChild = child.props.children;
+        const slottableProps = child.props as SlottableProps;
+        const slottableChild = slottableProps.as ?? slottableProps.children;
         const childArray = React.Children.toArray(slottableChild);
         const host = childArray[0];
 
@@ -36,7 +37,7 @@ function findAndReplaceSlottable(children: React.ReactNode): {
         }
 
         hostElement = host;
-        hostChildren = host.props.children;
+        hostChildren = slottableProps.as ? slottableProps.children : host.props.children;
         return hostChildren;
       }
 
@@ -70,20 +71,27 @@ function mergeProps(
   const merged = { ...outerProps };
 
   for (const key in hostProps) {
-    if (key === 'ref') {
+    if (key === 'ref' && outerProps.ref !== hostProps.ref) {
       merged.ref = mergeRefs(outerProps.ref, hostProps.ref);
-    } else if (key === 'className' && hostProps.className && outerProps.className) {
+    } else if (
+      key === 'className' &&
+      hostProps.className &&
+      outerProps.className &&
+      outerProps.className !== hostProps.className
+    ) {
       merged.className = `${outerProps.className} ${hostProps.className}`;
     } else if (
       key === 'style' &&
       typeof outerProps.style === 'object' &&
-      typeof hostProps.style === 'object'
+      typeof hostProps.style === 'object' &&
+      outerProps.style !== hostProps.style
     ) {
       merged.style = { ...outerProps.style, ...hostProps.style };
     } else if (
       key.startsWith('on') &&
       typeof outerProps[key] === 'function' &&
-      typeof hostProps[key] === 'function'
+      typeof hostProps[key] === 'function' &&
+      outerProps[key] !== hostProps[key]
     ) {
       const outerHandler = outerProps[key];
       const hostHandler = hostProps[key];

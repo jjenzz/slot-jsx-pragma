@@ -89,10 +89,12 @@ function performSlotTransformation(props: Props): SlotTransformationResult | nul
   try {
     if (childArray.length <= 1) {
       // check if we have a single child that's not a Slottable
-      if (React.isValidElement<Props>(singleChild) && singleChild.type !== Slottable) {
-        const ref = extractRef(singleChild);
-        const mergedProps = mergeProps(outerProps, { ...singleChild.props, ref });
-        return { type: singleChild.type, props: mergedProps };
+      if (React.isValidElement<Props>(singleChild)) {
+        if (singleChild.type !== Slottable) {
+          const ref = extractRef(singleChild);
+          const mergedProps = mergeProps(outerProps, { ...singleChild.props, ref });
+          return { type: singleChild.type, props: mergedProps };
+        }
       } else {
         throw new Error(`Slot requires an element child to slot onto`);
       }
