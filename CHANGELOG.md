@@ -1,3 +1,22 @@
+# v1.0.0 (Sun Dec 14 2025)
+
+#### 💥 Breaking Change
+
+- avoid tree traversal for nested slottables [#29](https://github.com/jjenzz/slot-jsx-pragma/pull/29) ([@jjenzz](https://github.com/jjenzz))
+
+#### 📝 Documentation
+
+- Follow Base UI brand name [#27](https://github.com/jjenzz/slot-jsx-pragma/pull/27) ([@oliviertassinari](https://github.com/oliviertassinari))
+- update note in docs about render function constraints [#28](https://github.com/jjenzz/slot-jsx-pragma/pull/28) ([@jjenzz](https://github.com/jjenzz))
+- add note to docs about render function constraints [#26](https://github.com/jjenzz/slot-jsx-pragma/pull/26) ([@jjenzz](https://github.com/jjenzz))
+
+#### Authors: 2
+
+- Jenna Smith ([@jjenzz](https://github.com/jjenzz))
+- Olivier Tassinari ([@oliviertassinari](https://github.com/oliviertassinari))
+
+---
+
 # v0.2.1 (Sat Dec 13 2025)
 
 #### 🐛 Bug Fix
