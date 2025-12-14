@@ -5,7 +5,7 @@ A custom JSX pragma that enables declarative slottable components for powering `
 ## Features
 
 - 🪆 **Nested Slottables**: Supports deeply nested slottable components
-- 🔥 **No `React.cloneElement`**: Transforms tree at creation time, outside render phase.
+- 🔥 **No `React.cloneElement`**: Transforms tree at creation time, outside render phase
 - ✨ **React Server Components**: Fully compatible with RSC and SSR
 - ⏳ **Async Components**: Can slot onto async server components
 - 🧹 **Streamlined React tree**: No more [`SlotClone` components](https://github.com/radix-ui/primitives/blob/main/packages/react/slot/src/slot.tsx#L101) in devtools
@@ -62,7 +62,7 @@ export function Button({ asChild, children, ...props }: ButtonProps) {
 
 ## How It Works
 
-When `asChild={true}`, the component's root element is replaced by its child element, while preserving the component's internal structure.
+When `Slot` is rendered, the component's root element is replaced by its child element, while preserving the component's internal structure.
 
 ### Simple Case (No Slottable needed)
 
@@ -87,9 +87,9 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
 **IconButton internally renders:**
 
 ```tsx
-<Slot onClick={handleClick}>
+<Slot {...props}>
   <Icon />
-  <Slottable>{children}</Slottable>
+  <Slottable>{props.children}</Slottable>
 </Slot>
 ```
 
@@ -105,8 +105,8 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
 **Nested slottables?** Use `as` prop:
 
 ```tsx
-<Slot onClick={handleClick}>
-  <Slottable as={children}>
+<Slot {...props}>
+  <Slottable as={props.children}>
     {(children) => (
       <>
         <Icon />
@@ -128,7 +128,7 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
 
 ### With Render Prop
 
-If you want to define an API where you pass a _render prop_ to specify the underlying element—like [Ariakit](https://ariakit.org/guide/composition) or [Base UI](https://base-ui.com/react/handbook/composition#render-function)—use the `as` prop on `Slottable`.
+If you want to define a render prop API like [Ariakit](https://ariakit.org/guide/composition) or [Base UI](https://base-ui.com/react/handbook/composition#render-function), use the `as` prop on `Slottable`.
 
 **Example:**
 
@@ -157,17 +157,17 @@ or:
 
 This pattern gives consumers full control over the rendered element while still preserving the slot mechanics.
 
-When using the function pattern, `Slot` will no longer merge props for you, to give you control over prop forwarding and composition.
+When using the function pattern, `Slot` will not merge props for you, to give you control over prop forwarding and composition.
 
 > **Note:** render functions cannot be passed to a client comp from an RSC, so bear that in mind if you decide to use this API.
 
-## Ejecting JSX Pragmas
+## Ejecting JSX Pragma
 
 You can eject the pragma to configure it, or compose it with other custom pragmas for styling or other transformations.
 
 To eject, create your own custom JSX runtime files in your project:
 
-**src/jsx-runtime/jsx-runtime.ts:**
+**app/jsx-runtime/jsx-runtime.ts:**
 
 ```tsx
 import { jsx as baseJsx, jsxs as baseJsxs, Fragment } from 'react/jsx-runtime';
@@ -184,7 +184,7 @@ export const jsxs = withCssJsxs(withSlotJsxs(baseJsxs, { mergeProps }));
 export { Fragment };
 ```
 
-**src/jsx-runtime/jsx-dev-runtime.ts:**
+**app/jsx-runtime/jsx-dev-runtime.ts:**
 
 ```tsx
 import { jsxDEV as baseJsxDEV, Fragment } from 'react/jsx-dev-runtime';
