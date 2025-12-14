@@ -155,3 +155,57 @@ export const ButtonRenderProp = (props: React.ComponentProps<typeof ButtonRender
     />
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * Composition Test Components
+ * -----------------------------------------------------------------------------------------------*/
+
+export function CompositionEventTest() {
+  const handleOuterClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    console.log('outer handler fired');
+  };
+
+  const handleHostClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    console.log('host handler fired');
+  };
+
+  return (
+    <Button asChild onClick={handleOuterClick}>
+      <Link
+        href="/"
+        onClick={handleHostClick}
+        className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+      >
+        Click to test event handler merging
+      </Link>
+    </Button>
+  );
+}
+
+export function CompositionRefTest() {
+  const outerRef = React.useRef<React.ComponentRef<typeof Button>>(null);
+  const hostRef = React.useRef<React.ComponentRef<typeof Link>>(null);
+
+  React.useEffect(() => {
+    if (outerRef.current) {
+      console.log('outer ref received');
+    }
+    if (hostRef.current) {
+      console.log('host ref received');
+    }
+  }, []);
+
+  return (
+    <Button asChild ref={outerRef}>
+      <Link
+        href="/"
+        ref={hostRef}
+        className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+      >
+        Ref merging test
+      </Link>
+    </Button>
+  );
+}

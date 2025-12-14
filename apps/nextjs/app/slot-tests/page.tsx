@@ -478,6 +478,74 @@ export default function Page() {
             </Server.ButtonRender>
           </section>
         </div>
+
+        <div className="bg-zinc-900 rounded-lg shadow-lg shadow-zinc-950 p-8 border border-zinc-800">
+          <h2 className="text-xl font-bold text-white mb-6">Composition Tests</h2>
+          <p className="text-zinc-400 text-sm mb-8">
+            Tests for prop merging: className, style, event handlers, refs
+          </p>
+
+          <div className="space-y-8">
+            <section className="space-y-3" data-testid="composition-classname">
+              <h3 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+                className merging
+              </h3>
+              <Client.Button
+                asChild
+                className="outer-class text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                <Client.Link href="/" className="host-class">
+                  className merge test
+                </Client.Link>
+              </Client.Button>
+            </section>
+
+            <section className="space-y-3" data-testid="composition-style">
+              <h3 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+                style merging
+              </h3>
+              <Client.Button asChild style={{ color: 'red', padding: '10px' }}>
+                <Client.Link
+                  href="/"
+                  style={{ backgroundColor: 'blue', padding: '20px' }}
+                  className="underline underline-offset-2"
+                >
+                  style merge test
+                </Client.Link>
+              </Client.Button>
+            </section>
+
+            <section className="space-y-3" data-testid="composition-events">
+              <h3 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+                Event handler merging
+              </h3>
+              <Client.CompositionEventTest />
+            </section>
+
+            <section className="space-y-3" data-testid="composition-refs">
+              <h3 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+                Ref merging
+              </h3>
+              <Client.CompositionRefTest />
+            </section>
+
+            <section className="space-y-3" data-testid="composition-props">
+              <h3 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+                Prop override (data attributes)
+              </h3>
+              <Client.Button asChild data-outer="outer-value" data-shared="outer">
+                <Client.Link
+                  href="/"
+                  data-host="host-value"
+                  data-shared="host"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                >
+                  prop override test
+                </Client.Link>
+              </Client.Button>
+            </section>
+          </div>
+        </div>
       </div>
     </main>
   );

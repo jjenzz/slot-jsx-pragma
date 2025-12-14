@@ -6,9 +6,12 @@
   "scripts": {
     "postinstall": "pnpm build",
     "build": "pnpm --filter=\"slot-jsx\" build",
-    "release": "auto shipit"
+    "release": "auto shipit",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "auto": "^11.3.6",
     "lerna": "^9.0.3",
     "prettier": "^3.7.4"

@@ -1,2 +1,6 @@
 node_modules
 tsconfig.app.tsbuildinfo
+tsconfig.node.tsbuildinfo
+tests/test-results
+tests/playwright-report
+dist
