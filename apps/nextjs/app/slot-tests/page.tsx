@@ -351,6 +351,13 @@ export default function Page() {
 
           <section className="space-y-3">
             <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonRenderProp render function as Client.Link
+            </h2>
+            <Client.ButtonRenderProp>children</Client.ButtonRenderProp>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
               Server.ButtonRender rendered as Client.Link element
             </h2>
             <Server.ButtonRender
@@ -383,9 +390,36 @@ export default function Page() {
 
           <section className="space-y-3">
             <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
-              Client.ButtonRenderProp render function as Client.Link
+              Server.ButtonRender render function as Server.Link element
             </h2>
-            <Client.ButtonRenderProp>children</Client.ButtonRenderProp>
+            <Server.ButtonRender
+              render={(props) => (
+                <Server.Link
+                  {...props}
+                  href="/"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              )}
+            >
+              children
+            </Server.ButtonRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonRender render function as Client.Link element
+            </h2>
+            <Server.ButtonRender
+              render={(props) => (
+                <Client.Link
+                  {...props}
+                  href="/"
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              )}
+            >
+              children
+            </Server.ButtonRender>
           </section>
         </div>
       </div>

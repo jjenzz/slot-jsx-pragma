@@ -144,7 +144,7 @@ or:
 
 This pattern gives consumers full control over the rendered element while still preserving the slot mechanics. When using the function pattern, `Slot` will no longer merge props for you to give you control over prop forwarding and composition.
 
-> **Note:** render functions are only possible in client components, so bear that in mind if you decide to use this API.
+> **Note:** render functions cannot be passed to a client comp from an RSC, so bear that in mind if you decide to use this API.
 
 ## Ejecting JSX Pragmas
 
