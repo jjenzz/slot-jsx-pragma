@@ -2,15 +2,13 @@ import * as React from 'react';
 import { Slottable, SlottableProps } from './slot';
 
 /**
- * Walks the children tree and finds the Slottable component in a single pass.
- * Returns both the host element from within Slottable AND the transformed children
- * with Slottable replaced by the host element's children.
+ * Finds Slottable in children, extracts host element, and builds output children.
+ * Handles both single Slottable and Slottable among siblings.
  *
- * @throws if no Slottable is found
- * @throws if Slottable contains more than one child
- * @throws if child is not a valid React element
+ * @throws if Slottable host resolves to more than one element
+ * @throws if resolved host is not a valid React element
  */
-function findAndReplaceSlottable(
+function findSlottable(
   outerProps: Record<string, any>,
   children: React.ReactNode,
 ): {
@@ -18,54 +16,84 @@ function findAndReplaceSlottable(
   children: React.ReactNode;
   isAsFunctionProp: boolean;
 } {
+  const childArray = React.Children.toArray(children);
+  const outputChildren: React.ReactNode[] = [];
   let hostElement: React.ReactElement<React.PropsWithChildren> | null = null;
-  let hostChildren: React.ReactNode = null;
   let isAsFunctionProp = false;
 
-  const transform = (node: React.ReactNode): React.ReactNode => {
-    return React.Children.map(node, (child) => {
-      if (!React.isValidElement<React.PropsWithChildren>(child)) return child;
+  for (const child of childArray) {
+    if (React.isValidElement<SlottableProps>(child) && child.type === Slottable) {
+      const slottableProps = child.props;
+      const asProp = slottableProps.as;
 
-      // Found the Slottable - extract host and return its children
-      if (child.type === Slottable) {
-        const slottableProps = child.props as SlottableProps;
-        const slottableChild = slottableProps.as ?? slottableProps.children;
-        const isFn = typeof slottableChild === 'function';
-        const slottable = isFn ? slottableChild(outerProps) : slottableChild;
-        const childArray = React.Children.toArray(slottable);
-        const host = childArray[0];
+      // If `as` is provided, use it as the host (supports function or element)
+      if (asProp != null) {
+        const isFn = typeof asProp === 'function';
+        const resolvedHost = isFn ? asProp(outerProps) : asProp;
+        const hostArray = React.Children.toArray(resolvedHost);
+        const singleChild = hostArray[0];
 
-        if (childArray.length !== 1) {
-          throw new Error('Slottable must contain exactly one child element');
+        if (hostArray.length !== 1) {
+          throw new Error('Slottable `as` must resolve to exactly one child element');
         }
 
-        if (!React.isValidElement<React.PropsWithChildren>(host)) {
-          throw new Error('Slottable child must be a valid React element');
+        if (!React.isValidElement<React.PropsWithChildren>(singleChild)) {
+          throw new Error('Slottable `as` must be a valid React element or render function');
         }
 
-        hostElement = host;
-        hostChildren = slottableProps.as ? slottableProps.children : host.props.children;
+        const hostChildren = resolveSlottableChildren(slottableProps, singleChild.props.children);
+        outputChildren.push(hostChildren);
+        hostElement = singleChild;
         isAsFunctionProp = isFn;
-        return hostChildren;
+
+        continue;
       }
 
-      // Recurse into children of other elements
-      if (child.props.children) {
-        const newChildren = transform(child.props.children);
-        return React.createElement(child.type, child.props, newChildren);
+      // No `as` prop - use children as the host
+      if (typeof slottableProps.children === 'function') {
+        throw new Error('Slottable children cannot be a function without an `as` prop');
       }
 
-      return child;
-    });
-  };
+      const hostArray = React.Children.toArray(slottableProps.children);
+      const singleChild = hostArray[0];
 
-  const transformedChildren = transform(children);
+      if (hostArray.length !== 1) {
+        throw new Error('Slottable must contain exactly one child element');
+      }
 
-  if (!hostElement) {
-    throw new Error('Slot component requires a Slottable child');
+      if (!React.isValidElement<React.PropsWithChildren>(singleChild)) {
+        throw new Error('Slottable child must be a valid React element');
+      }
+
+      outputChildren.push(singleChild.props.children);
+      hostElement = singleChild;
+    } else {
+      outputChildren.push(child);
+    }
   }
 
-  return { element: hostElement, children: transformedChildren, isAsFunctionProp };
+  if (!hostElement) {
+    throw new Error('Slot requires a Slottable child or a single element to slot onto');
+  }
+
+  return {
+    element: hostElement,
+    children: outputChildren.length === 1 ? outputChildren[0] : outputChildren,
+    isAsFunctionProp,
+  };
+}
+
+/**
+ * Resolves the children that should be rendered inside the host element.
+ * If `children` is a function, we pass the host element's children to it.
+ */
+function resolveSlottableChildren(
+  slottableProps: SlottableProps,
+  hostChildren: React.ReactNode,
+): React.ReactNode {
+  if (typeof slottableProps.children === 'function') return slottableProps.children(hostChildren);
+  if (slottableProps.children !== undefined) return slottableProps.children;
+  return hostChildren;
 }
 
 /**
@@ -138,4 +166,4 @@ function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>): React.Ref<T> | 
 
 /* ---------------------------------------------------------------------------------------------- */
 
-export { findAndReplaceSlottable, mergeProps };
+export { findSlottable, mergeProps };

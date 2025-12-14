@@ -165,6 +165,34 @@ export default function Page() {
 
           <section className="space-y-3">
             <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonSiblingSlottable as Server.Link
+            </h2>
+            <Client.ButtonSiblingSlottable asChild>
+              <Server.Link
+                href="/"
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                children
+              </Server.Link>
+            </Client.ButtonSiblingSlottable>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonSiblingSlottable as Client.Link
+            </h2>
+            <Client.ButtonSiblingSlottable asChild>
+              <Client.Link
+                href="/"
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                children
+              </Client.Link>
+            </Client.ButtonSiblingSlottable>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
               Server.LinkButton
             </h2>
             <Server.LinkButton
@@ -313,6 +341,34 @@ export default function Page() {
                 children
               </Client.Link>
             </Server.IconButtonNestedSlottable>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonSiblingSlottable as Server.Link
+            </h2>
+            <Server.ButtonSiblingSlottable asChild>
+              <Server.Link
+                href="/"
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                children
+              </Server.Link>
+            </Server.ButtonSiblingSlottable>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonSiblingSlottable as Client.Link
+            </h2>
+            <Server.ButtonSiblingSlottable asChild>
+              <Client.Link
+                href="/"
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                children
+              </Client.Link>
+            </Server.ButtonSiblingSlottable>
           </section>
         </div>
 

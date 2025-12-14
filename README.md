@@ -5,7 +5,7 @@ A custom JSX pragma that enables declarative slottable components for powering `
 ## Features
 
 - 🪆 **Nested Slottables**: Supports deeply nested slottable components
-- 🔥 **No `React.cloneElement`**: Uses a safe element reconstruction approach
+- 🔥 **No `React.cloneElement`**: Transforms tree at creation time, outside render phase.
 - ✨ **React Server Components**: Fully compatible with RSC and SSR
 - ⏳ **Async Components**: Can slot onto async server components
 - 🧹 **Streamlined React tree**: No more [`SlotClone` components](https://github.com/radix-ui/primitives/blob/main/packages/react/slot/src/slot.tsx#L101) in devtools
@@ -76,7 +76,7 @@ When `asChild={true}`, the component's root element is replaced by its child ele
 
 ### Complex Case (With Slottable)
 
-When you have siblings to the children (like icons or wrappers), use `Slottable` to mark where the child's content goes:
+When you have siblings to the children (like icons or wrappers), use `Slottable` to specify where the child's content goes:
 
 ```tsx
 <IconButton asChild onClick={handleClick}>
@@ -89,9 +89,31 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
 ```tsx
 <Slot onClick={handleClick}>
   <Icon />
-  <span>
-    <Slottable>{children}</Slottable>
-  </span>
+  <Slottable>{children}</Slottable>
+</Slot>
+```
+
+**The pragma transforms this to:**
+
+```tsx
+<a href="/foo" onClick={handleClick}>
+  <Icon />
+  Click me
+</a>
+```
+
+**Nested slottables?** Use `as` prop:
+
+```tsx
+<Slot onClick={handleClick}>
+  <Slottable as={children}>
+    {(children) => (
+      <>
+        <Icon />
+        <span>{children}</span> {/* <-- nested in a span */}
+      </>
+    )}
+  </Slottable>
 </Slot>
 ```
 
@@ -102,15 +124,6 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
   <Icon />
   <span>Click me</span>
 </a>
-```
-
-**Without siblings?** Skip `Slottable`:
-
-```tsx
-export function Button({ asChild, children, ...props }) {
-  const Comp = asChild ? Slot : 'button';
-  return <Comp {...props}>{children}</Comp>;
-}
 ```
 
 ### With Render Prop
@@ -142,7 +155,9 @@ or:
 <Button render={(props) => <a {...props} href="/foo" />}>Click me</Button>
 ```
 
-This pattern gives consumers full control over the rendered element while still preserving the slot mechanics. When using the function pattern, `Slot` will no longer merge props for you to give you control over prop forwarding and composition.
+This pattern gives consumers full control over the rendered element while still preserving the slot mechanics.
+
+When using the function pattern, `Slot` will no longer merge props for you, to give you control over prop forwarding and composition.
 
 > **Note:** render functions cannot be passed to a client comp from an RSC, so bear that in mind if you decide to use this API.
 
@@ -207,8 +222,9 @@ When slotting occurs, props are merged intelligently:
 
 1. **Slottable is optional**: If you don't have wrappers or siblings to the children, you don't need `Slottable`
 2. **Single Slottable**: Only one `Slottable` per `Slot` (if you use it)
-3. **Single Host Element**: The child you're slotting onto must be exactly one React element
-4. **Prop Merging**: Host props override component props (except for className, style, ref, and event handlers)
+3. **Direct child**: `Slottable` must be a direct child of `Slot`; use its render function to build nested markup
+4. **Single Host Element**: The child you're slotting onto must be exactly one React element
+5. **Prop Merging**: Host props override component props (except for className, style, ref, and event handlers)
 
 ## Examples
 

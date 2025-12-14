@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Slot, Slottable } from './slot';
-import { findAndReplaceSlottable, mergeProps } from './helpers';
+import { findSlottable, mergeProps } from './helpers';
 
 type Props = React.PropsWithChildren<React.RefAttributes<any>>;
 type Options = { mergeProps?: typeof mergeProps };
@@ -92,21 +92,19 @@ function performSlotTransformation(
   const mergePropsFn = options.mergeProps ?? mergeProps;
 
   try {
-    if (childArray.length <= 1) {
-      // check if we have a single child that's not a Slottable
-      if (React.isValidElement<Props>(singleChild)) {
-        if (singleChild.type !== Slottable) {
-          const ref = extractRef(singleChild);
-          const mergedProps = mergePropsFn(outerProps, { ...singleChild.props, ref });
-          return { type: singleChild.type, props: mergedProps };
-        }
-      } else {
-        throw new Error(`Slot requires an element child to slot onto`);
-      }
+    // Single non-Slottable element: slot directly onto it
+    if (
+      childArray.length === 1 &&
+      React.isValidElement<Props>(singleChild) &&
+      singleChild.type !== Slottable
+    ) {
+      const ref = extractRef(singleChild);
+      const mergedProps = mergePropsFn(outerProps, { ...singleChild.props, ref });
+      return { type: singleChild.type, props: mergedProps };
     }
 
-    // otherwise, try to find a Slottable host in the tree
-    const host = findAndReplaceSlottable(outerProps, children);
+    // Otherwise, find Slottable, extract host, build output children
+    const host = findSlottable(outerProps, children);
     const ref = extractRef(host.element as React.ReactElement<Props>);
     const hostProps = { ...(host.element.props as Props), children: host.children, ref };
     const mergedProps = host.isAsFunctionProp ? hostProps : mergePropsFn(outerProps, hostProps);

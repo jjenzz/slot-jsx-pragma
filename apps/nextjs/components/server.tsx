@@ -17,7 +17,13 @@ export const LinkSlottable = ({
   const Comp = asChild ? Slot : 'a';
   return (
     <Comp {...props}>
-      <span>left</span> <Slottable>{props.children}</Slottable> <span>right</span>
+      <Slottable as={props.children}>
+        {(children) => (
+          <>
+            <span>left</span> {children} <span>right</span>
+          </>
+        )}
+      </Slottable>
     </Comp>
   );
 };
@@ -39,19 +45,65 @@ export const Button = ({
 };
 
 export const ButtonSlottable = ({
-  children,
   asChild = false,
   ...props
 }: React.ComponentProps<'button'> & { asChild?: boolean }) => {
   const Comp = asChild ? Slot : 'button';
   return (
     <Comp {...props}>
-      <span>left</span> <Slottable>{children}</Slottable> <span>right</span>
+      <Slottable as={props.children}>
+        {(children) => (
+          <>
+            <span>left</span> {children} <span>right</span>
+          </>
+        )}
+      </Slottable>
     </Comp>
   );
 };
 
 export const ButtonNestedSlottable = ({
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> & { asChild?: boolean }) => {
+  const Comp = asChild ? Slot : 'button';
+  return (
+    <Comp {...props}>
+      <Slottable as={props.children}>
+        {(children) => (
+          <>
+            <span>left</span>
+            <b>bold {children}</b>
+            <span>right</span>
+          </>
+        )}
+      </Slottable>
+    </Comp>
+  );
+};
+
+export const IconButtonNestedSlottable = ({
+  asChild,
+  ...props
+}: React.ComponentProps<'button'> & { asChild?: boolean }) => {
+  const Comp = asChild ? Slot : 'button';
+  return (
+    <Client.Button asChild>
+      <Comp {...props}>
+        <Slottable as={props.children}>
+          {(children) => (
+            <>
+              <span>ICON</span>
+              <b>bold {children}</b>
+            </>
+          )}
+        </Slottable>
+      </Comp>
+    </Client.Button>
+  );
+};
+
+export const ButtonSiblingSlottable = ({
   children,
   asChild = false,
   ...props
@@ -60,29 +112,9 @@ export const ButtonNestedSlottable = ({
   return (
     <Comp {...props}>
       <span>left</span>
-      <b>
-        bold <Slottable>{children}</Slottable>
-      </b>
+      <Slottable>{children}</Slottable>
       <span>right</span>
     </Comp>
-  );
-};
-
-export const IconButtonNestedSlottable = ({
-  asChild,
-  children,
-  ...props
-}: React.ComponentProps<'button'> & { asChild?: boolean }) => {
-  const Comp = asChild ? Slot : 'button';
-  return (
-    <Client.Button asChild>
-      <Comp {...props}>
-        <span>ICON</span>
-        <b>
-          bold <Slottable>{children}</Slottable>
-        </b>
-      </Comp>
-    </Client.Button>
   );
 };
 
@@ -95,11 +127,7 @@ export const ButtonRender = ({ render, ...props }: ButtonRenderProps) => {
   const Comp = render ? Slot : 'button';
   return (
     <Comp {...props}>
-      {typeof render === 'function' ? (
-        render(props)
-      ) : (
-        <Slottable as={render}>{props.children}</Slottable>
-      )}
+      <Slottable as={render}>{props.children}</Slottable>
     </Comp>
   );
 };
