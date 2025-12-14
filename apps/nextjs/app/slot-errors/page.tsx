@@ -15,14 +15,14 @@ export default function Page() {
 
         <div className="bg-red-950/50 rounded-lg shadow-lg shadow-zinc-950 p-8 mt-8 border border-red-900">
           <div className="space-y-8">
-            <section className="space-y-3">
+            <section className="space-y-3" data-error-type="client">
               <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
                 Client.Button asChild with no children
               </h3>
               <Client.Button asChild className="bg-red-500" />
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-3" data-error-type="client">
               <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
                 Client.Button asChild with text-only children
               </h3>
@@ -31,7 +31,7 @@ export default function Page() {
               </Client.Button>
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-3" data-error-type="client">
               <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
                 Client.Button asChild with multiple children (no Slottable)
               </h3>
@@ -41,7 +41,7 @@ export default function Page() {
               </Client.Button>
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-3" data-error-type="client">
               <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
                 Client.ButtonSlottable asChild with multiple children (has Slottable but no single
                 valid element)
@@ -52,14 +52,14 @@ export default function Page() {
               </Client.ButtonSlottable>
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-3" data-error-type="server">
               <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
                 Server.Button asChild with no children
               </h3>
               <Server.Button asChild className="bg-red-500" />
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-3" data-error-type="server">
               <h3 className="text-lg font-semibold text-zinc-200 border-b border-red-900 pb-2">
                 Server.Button asChild with mixed invalid content
               </h3>
