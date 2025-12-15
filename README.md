@@ -70,8 +70,20 @@ When `Slot` is rendered, the component's root element is replaced by its child e
 <Button asChild onClick={handleClick}>
   <a href="/foo">Click me</a>
 </Button>
+```
 
-// Result: <a href="/foo" onClick={handleClick}>Click me</a>
+**Button internally renders:**
+
+```tsx
+<Slot {...props}>{children}</Slot>
+```
+
+**The pragma transforms this to:**
+
+```tsx
+<a href="/foo" onClick={handleClick}>
+  Click me
+</a>
 ```
 
 ### Complex Case (With Slottable)
@@ -106,14 +118,9 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
 
 ```tsx
 <Slot {...props}>
-  <Slottable as={props.children}>
-    {(children) => (
-      <>
-        <Icon />
-        <span>{children}</span> {/* <-- nested in a span */}
-      </>
-    )}
-  </Slottable>
+  <Icon />
+  {/* nested in a span */}
+  <Slottable as={props.children}>{(children) => <span>{children}</span>}</Slottable>
 </Slot>
 ```
 

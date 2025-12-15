@@ -17,13 +17,9 @@ export const LinkSlottable = ({
   const Comp = asChild ? Slot : 'a';
   return (
     <Comp {...props}>
-      <Slottable as={props.children}>
-        {(children) => (
-          <>
-            <span>left</span> {children} <span>right</span>
-          </>
-        )}
-      </Slottable>
+      <span>left</span>
+      <Slottable>{props.children}</Slottable>
+      <span>right</span>
     </Comp>
   );
 };
@@ -51,13 +47,9 @@ export const ButtonSlottable = ({
   const Comp = asChild ? Slot : 'button';
   return (
     <Comp {...props}>
-      <Slottable as={props.children}>
-        {(children) => (
-          <>
-            <span>left</span> {children} <span>right</span>
-          </>
-        )}
-      </Slottable>
+      <span>left</span>
+      <Slottable>{props.children}</Slottable>
+      <span>right</span>
     </Comp>
   );
 };
@@ -69,15 +61,9 @@ export const ButtonNestedSlottable = ({
   const Comp = asChild ? Slot : 'button';
   return (
     <Comp {...props}>
-      <Slottable as={props.children}>
-        {(children) => (
-          <>
-            <span>left</span>
-            <b>bold {children}</b>
-            <span>right</span>
-          </>
-        )}
-      </Slottable>
+      <span>left</span>
+      <Slottable as={props.children}>{(children) => <b>bold {children}</b>}</Slottable>
+      <span>right</span>
     </Comp>
   );
 };
@@ -90,14 +76,8 @@ export const IconButtonNestedSlottable = ({
   return (
     <Client.Button asChild>
       <Comp {...props}>
-        <Slottable as={props.children}>
-          {(children) => (
-            <>
-              <span>ICON</span>
-              <b>bold {children}</b>
-            </>
-          )}
-        </Slottable>
+        <span>ICON</span>
+        <Slottable as={props.children}>{(children) => <b>bold {children}</b>}</Slottable>
       </Comp>
     </Client.Button>
   );
