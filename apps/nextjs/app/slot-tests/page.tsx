@@ -414,6 +414,13 @@ export default function Page() {
 
           <section className="space-y-3">
             <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonNestedRenderProp render function as Client.Link
+            </h2>
+            <Client.ButtonNestedRenderProp>children</Client.ButtonNestedRenderProp>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
               Server.ButtonRender rendered as Client.Link element
             </h2>
             <Server.ButtonRender
@@ -476,6 +483,68 @@ export default function Page() {
             >
               children
             </Server.ButtonRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonNestedRender render function as Server.Link
+            </h2>
+            <Server.ButtonNestedRender
+              render={(props) => (
+                <Server.Link
+                  href="/"
+                  {...props}
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              )}
+            >
+              children
+            </Server.ButtonNestedRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonNestedRender render function as Client.Link
+            </h2>
+            <Server.ButtonNestedRender
+              render={(props) => (
+                <Client.Link
+                  href="/"
+                  {...props}
+                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                />
+              )}
+            >
+              children
+            </Server.ButtonNestedRender>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Client.ButtonRenderAsChildren (as=children, children=children)
+            </h2>
+            <Client.ButtonRenderAsChildren>
+              <Client.Link
+                href="/"
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                children
+              </Client.Link>
+            </Client.ButtonRenderAsChildren>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-zinc-200 border-b border-zinc-700 pb-2">
+              Server.ButtonRenderAsChildren (as=children, children=children)
+            </h2>
+            <Server.ButtonRenderAsChildren>
+              <Server.Link
+                href="/"
+                className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                children
+              </Server.Link>
+            </Server.ButtonRenderAsChildren>
           </section>
         </div>
 

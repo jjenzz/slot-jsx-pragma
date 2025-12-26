@@ -1,44 +1,31 @@
 import * as React from 'react';
-import { Slot, Slottable } from './slot';
-import { findSlottable, mergeProps } from './helpers';
+import { Slot, Slottable, type SlottableProps } from './slot';
+import { mergeProps } from './helpers';
 
-type Props = React.PropsWithChildren<React.RefAttributes<any>>;
+type Props = Record<string, unknown> & { children?: React.ReactNode; ref?: React.Ref<unknown> };
 type Options = { mergeProps?: typeof mergeProps };
 
 /* -------------------------------------------------------------------------------------------------
  * withSlot
- * -------------------------------------------------------------------------------------------------
- * When the type is Slot, this performs the slotting transformation:
- * - If there's a single child that's not a Slottable, slots directly onto it
- * - Otherwise:
- *   1. Finds the Slottable component in the children tree
- *   2. Extracts the host element from within Slottable
- *   3. Replaces Slottable with the host element's children in the template
- *   4. Merges props from the Slot and the host element
- *   5. Creates a new element with the host's type and merged props
- * - If slotting fails, logs error to console
- *
- * For all other types, delegates to the base JSX factory.
  * -----------------------------------------------------------------------------------------------*/
 
-type JsxFactory = (
-  type: React.ElementType<any, any>,
-  props: Props,
-  key?: string,
-) => React.ReactElement;
+type JsxFactory = (type: React.ElementType, props: Props, key?: string) => React.ReactElement;
 
 function withSlot(baseJsx: JsxFactory, options?: Options): JsxFactory {
-  const jsx: JsxFactory = (type, props, key) => {
+  const mergePropsFn = options?.mergeProps ?? mergeProps;
+
+  return (type, props, key) => {
     if (type !== Slot) return baseJsx(type, props, key);
-    const result = performSlotTransformation(props, options);
-    return result ? baseJsx(result.type, result.props, key) : baseJsx(Slot, props, key);
+
+    const result = transformSlot(props, mergePropsFn, baseJsx);
+    if (!result) return baseJsx(type, props, key);
+
+    return baseJsx(result.type, result.props, key);
   };
-  return jsx;
 }
 
 /**
  * Wraps a base JSX factory for static children (jsxs).
- * Identical behavior to withSlot since the transformation is the same.
  */
 function withSlotJsxs(baseJsxs: JsxFactory, options?: Options): JsxFactory {
   return withSlot(baseJsxs, options);
@@ -46,9 +33,6 @@ function withSlotJsxs(baseJsxs: JsxFactory, options?: Options): JsxFactory {
 
 /* -------------------------------------------------------------------------------------------------
  * withSlotDev
- * -------------------------------------------------------------------------------------------------
- * Wraps a base jsxDEV factory to add slotting capabilities in development mode.
- * This is similar to withSlot but handles the additional parameters used by jsxDEV.
  * -----------------------------------------------------------------------------------------------*/
 
 type JsxDevFactory = (
@@ -56,76 +40,166 @@ type JsxDevFactory = (
   props: Props,
   key: React.Key | undefined,
   isStatic: boolean,
-  source?: any,
+  source?: { fileName: string; lineNumber: number; columnNumber: number },
   self?: unknown,
 ) => React.ReactElement;
 
-/**
- * Wraps a base jsxDEV factory to add slotting capabilities in development mode.
- * This is similar to withSlot but handles the additional parameters used by jsxDEV.
- */
 function withSlotDev(baseJsxDev: JsxDevFactory, options?: Options): JsxDevFactory {
-  const jsxDEV: JsxDevFactory = (type, props, key, isStatic, source, self) => {
-    if (type !== Slot) return baseJsxDev(type, props, key, isStatic, source, self);
-    const result = performSlotTransformation(props, options);
+  const mergePropsFn = options?.mergeProps ?? mergeProps;
+  const jsx = (type: React.ElementType, props: Props, key?: string) =>
+    baseJsxDev(type, props, key, false, undefined, undefined);
 
-    return result
-      ? baseJsxDev(result.type, result.props, key, isStatic, source, self)
-      : baseJsxDev(Slot, props, key, isStatic, source, self);
+  return (type, props, key, isStatic, source, self) => {
+    if (type !== Slot) return baseJsxDev(type, props, key, isStatic, source, self);
+
+    const result = transformSlot(props, mergePropsFn, jsx);
+    if (!result) return baseJsxDev(type, props, key, isStatic, source, self);
+
+    return baseJsxDev(result.type, result.props, key, isStatic, source, self);
   };
-  return jsxDEV;
 }
 
 /* -------------------------------------------------------------------------------------------------
- * performSlotTransformation
+ * transformSlot
  * -----------------------------------------------------------------------------------------------*/
 
-type SlotTransformationResult = Pick<React.ReactElement<Props, any>, 'type' | 'props'>;
+interface TransformResult {
+  type: React.ElementType;
+  props: Props;
+}
 
-function performSlotTransformation(
+function transformSlot(
   props: Props,
-  options: Options = {},
-): SlotTransformationResult | null {
+  mergePropsFn: typeof mergeProps,
+  jsx: JsxFactory,
+): TransformResult | null {
   const { children, ...outerProps } = props;
   const childArray = React.Children.toArray(children);
-  const singleChild = childArray[0];
-  const mergePropsFn = options.mergeProps ?? mergeProps;
+  const child = childArray[0];
 
   try {
-    // Single non-Slottable element: slot directly onto it
-    if (
-      childArray.length === 1 &&
-      React.isValidElement<Props>(singleChild) &&
-      singleChild.type !== Slottable
-    ) {
-      const ref = extractRef(singleChild);
-      const mergedProps = mergePropsFn(outerProps, { ...singleChild.props, ref });
-      return { type: singleChild.type, props: mergedProps };
+    // Single non-Slottable child: slot directly onto it
+    if (childArray.length === 1 && React.isValidElement<Props>(child) && child.type !== Slottable) {
+      const ref = extractRef(child);
+      const merged = mergePropsFn(outerProps, { ...child.props, ref });
+      return { type: child.type as React.ElementType, props: merged };
     }
 
-    // Otherwise, find Slottable, extract host, build output children
-    const host = findSlottable(outerProps, children);
-    const ref = extractRef(host.element as React.ReactElement<Props>);
-    const hostProps = { ...(host.element.props as Props), children: host.children, ref };
-    const mergedProps = host.isAsFunctionProp ? hostProps : mergePropsFn(outerProps, hostProps);
-    return { type: host.element.type, props: mergedProps };
+    // Find Slottable in tree and extract host
+    const found = findSlottableInTree(children, outerProps, jsx);
+    if (!found) throw new Error('Slot requires a Slottable child or a single element to slot onto');
+
+    const ref = extractRef(found.host);
+    const hostProps = { ...found.host.props, children: found.children, ref };
+    const merged = found.skipMerge ? hostProps : mergePropsFn(outerProps, hostProps);
+
+    return { type: found.host.type as React.ElementType, props: merged };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Slot transformation failed';
-    console.error(errorMessage);
+    console.error(error instanceof Error ? error.message : 'Slot transformation failed');
     return null;
   }
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * findSlottableInTree
+ * -----------------------------------------------------------------------------------------------*/
+
+interface FoundSlottable {
+  host: React.ReactElement<Props>;
+  children: React.ReactNode;
+  skipMerge: boolean;
+}
+
+function findSlottableInTree(
+  children: React.ReactNode,
+  outerProps: Props,
+  jsx: JsxFactory,
+): FoundSlottable | null {
+  const childArray = React.Children.toArray(children);
+  const rebuilt: React.ReactNode[] = [];
+  let found: FoundSlottable | null = null;
+
+  for (const child of childArray) {
+    if (React.isValidElement<SlottableProps>(child) && child.type === Slottable) {
+      const extracted = extractHost(child.props, outerProps);
+      found = { host: extracted.host, children: null, skipMerge: extracted.skipMerge };
+      rebuilt.push(extracted.replacement);
+      continue;
+    }
+
+    // Recurse into elements with children
+    if (React.isValidElement<Props>(child) && child.props.children != null) {
+      const nested = findSlottableInTree(child.props.children, outerProps, jsx);
+      if (nested) {
+        const replacment = jsx(
+          child.type as React.ElementType,
+          { ...child.props, children: nested.children },
+          child.key != null ? String(child.key) : undefined,
+        );
+        found = nested;
+        rebuilt.push(replacment);
+        continue;
+      }
+    }
+
+    rebuilt.push(child);
+  }
+
+  if (found) {
+    found.children = rebuilt.length === 1 ? rebuilt[0] : rebuilt;
+  }
+
+  return found;
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * extractHost
+ * -----------------------------------------------------------------------------------------------*/
+
+interface ExtractedHost {
+  host: React.ReactElement<Props>;
+  replacement: React.ReactNode;
+  skipMerge: boolean;
+}
+
+function extractHost(slottableProps: SlottableProps, outerProps: Props): ExtractedHost {
+  const { as: asProp, children } = slottableProps;
+
+  // `as` prop provided - use it as host
+  if (asProp != null) {
+    const isRenderFn = typeof asProp === 'function';
+    const resolved = isRenderFn ? asProp(outerProps) : asProp;
+    const isSameAsChildren = !isRenderFn && resolved === children;
+    const hostArray = React.Children.toArray(resolved);
+
+    if (hostArray.length !== 1 || !React.isValidElement<Props>(hostArray[0])) {
+      throw new Error('Slottable `as` must resolve to exactly one element');
+    }
+
+    const host = hostArray[0];
+    const replacement = isSameAsChildren ? host.props.children : children;
+
+    return { host, replacement, skipMerge: isRenderFn };
+  }
+
+  // No `as` - children is the host
+  const hostArray = React.Children.toArray(children);
+
+  if (hostArray.length !== 1 || !React.isValidElement<Props>(hostArray[0])) {
+    throw new Error('Slottable must contain exactly one child element');
+  }
+
+  const host = hostArray[0];
+  return { host, replacement: host.props.children, skipMerge: false };
 }
 
 /* -------------------------------------------------------------------------------------------------
  * extractRef
  * -----------------------------------------------------------------------------------------------*/
 
-function extractRef(element: React.ReactElement<Props>): React.Ref<any> | undefined {
-  const majorVersion = parseInt(React.version.split('.')[0] || '0', 10);
-  // React 19+ uses props.ref
-  if (majorVersion >= 19) return element.props.ref;
-  // React 17-18 use element.ref
-  return (element as any).ref;
+function extractRef(element: React.ReactElement<Props>): React.Ref<unknown> | undefined {
+  const major = parseInt(React.version.split('.')[0] || '0', 10);
+  return major >= 19 ? element.props.ref : (element as unknown as { ref?: React.Ref<unknown> }).ref;
 }
 
 /* ---------------------------------------------------------------------------------------------- */

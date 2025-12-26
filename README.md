@@ -114,13 +114,15 @@ When you have siblings to the children (like icons or wrappers), use `Slottable`
 </a>
 ```
 
-**Nested slottables?** Use `as` prop:
+**Nested slottables?**:
 
 ```tsx
 <Slot {...props}>
   <Icon />
   {/* nested in a span */}
-  <Slottable as={props.children}>{(children) => <span>{children}</span>}</Slottable>
+  <span>
+    <Slottable>{children}</Slottable>
+  </span>
 </Slot>
 ```
 

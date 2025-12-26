@@ -71,7 +71,9 @@ export const ButtonNestedSlottable = ({
   return (
     <Comp {...props}>
       <span>left</span>
-      <Slottable as={props.children}>{(children) => <b>bold {children}</b>}</Slottable>
+      <b>
+        bold <Slottable>{props.children}</Slottable>
+      </b>
       <span>right</span>
     </Comp>
   );
@@ -86,7 +88,9 @@ export const IconButtonNestedSlottable = ({
     <Button asChild>
       <Comp {...props}>
         <span>ICON</span>
-        <Slottable as={props.children}>{(children) => <b>bold {children}</b>}</Slottable>
+        <b>
+          bold <Slottable>{props.children}</Slottable>
+        </b>
       </Comp>
     </Button>
   );
@@ -133,6 +137,47 @@ export const ButtonRenderProp = (props: React.ComponentProps<typeof ButtonRender
         />
       )}
     />
+  );
+};
+
+// IRL this would be typed correctly but we're just testing functionality here
+interface ButtonNestedRenderProps extends React.ComponentProps<'button'> {
+  render?: React.ReactElement | ((props: any) => React.ReactElement);
+}
+
+export const ButtonNestedRender = ({ render, ...props }: ButtonNestedRenderProps) => {
+  const Comp = render ? Slot : 'button';
+  return (
+    <Comp {...props}>
+      <span>ICON</span>
+      <b>
+        bold <Slottable as={render}>{props.children}</Slottable>
+      </b>
+    </Comp>
+  );
+};
+
+export const ButtonNestedRenderProp = (props: React.ComponentProps<typeof ButtonNestedRender>) => {
+  return (
+    <ButtonNestedRender
+      {...props}
+      render={(props) => (
+        <Link
+          href="/"
+          {...props}
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+        />
+      )}
+    />
+  );
+};
+
+// Edge-case: passing props.children to both `as` and Slottable children
+export const ButtonRenderAsChildren = ({ ...props }: React.ComponentProps<'button'>) => {
+  return (
+    <Slot {...props}>
+      <Slottable as={props.children}>{props.children}</Slottable>
+    </Slot>
   );
 };
 

@@ -112,8 +112,7 @@ test.describe('Slot Tests - ButtonNestedSlottable (left bold-children right)', (
       // Bold should contain "bold children"
       const bold = link.locator('b');
       await expect(bold).toBeVisible();
-      await expect(bold).toContainText('bold');
-      await expect(bold).toContainText('children');
+      await expect(bold).toContainText('bold children');
     });
   }
 });
@@ -143,8 +142,7 @@ test.describe('Slot Tests - IconButtonNestedSlottable (ICON bold-children)', () 
       // Bold should contain "bold children"
       const bold = link.locator('b');
       await expect(bold).toBeVisible();
-      await expect(bold).toContainText('bold');
-      await expect(bold).toContainText('children');
+      await expect(bold).toContainText('bold children');
     });
   }
 });
@@ -194,6 +192,58 @@ test.describe('Slot Tests - ButtonRender (render prop pattern)', () => {
   ];
 
   for (const name of renderTests) {
+    test(`${name} renders as link with children`, async ({ page }) => {
+      const section = page.locator('section', {
+        has: page.locator(`h2:text-is("${name}")`),
+      });
+      const link = section.locator('a[href="/"]');
+      await expect(link).toBeVisible();
+      await expect(link).toHaveText('children');
+    });
+  }
+});
+
+test.describe('Slot Tests - ButtonNestedRender (nested render prop pattern)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/slot-tests');
+  });
+
+  // ButtonNestedRender: <span>ICON</span><b>bold {children}</b>
+  const nestedRenderTests = [
+    'Client.ButtonNestedRenderProp render function as Client.Link',
+    'Server.ButtonNestedRender render function as Server.Link',
+    'Server.ButtonNestedRender render function as Client.Link',
+  ];
+
+  for (const name of nestedRenderTests) {
+    test(`${name} renders link with ICON/bold-children`, async ({ page }) => {
+      const section = page.locator('section', {
+        has: page.locator(`h2:text-is("${name}")`),
+      });
+      const link = section.locator('a[href="/"]');
+      await expect(link).toBeVisible();
+      // Should have ICON span
+      await expect(link.locator('span:text("ICON")')).toBeVisible();
+      // Bold should contain "bold children"
+      const bold = link.locator('b');
+      await expect(bold).toBeVisible();
+      await expect(bold).toContainText('bold children');
+    });
+  }
+});
+
+test.describe('Slot Tests - ButtonRenderAsChildren (as=children, children=children)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/slot-tests');
+  });
+
+  // Backwards compat: passing props.children to both `as` and Slottable children
+  const backwardsCompatTests = [
+    'Client.ButtonRenderAsChildren (as=children, children=children)',
+    'Server.ButtonRenderAsChildren (as=children, children=children)',
+  ];
+
+  for (const name of backwardsCompatTests) {
     test(`${name} renders as link with children`, async ({ page }) => {
       const section = page.locator('section', {
         has: page.locator(`h2:text-is("${name}")`),

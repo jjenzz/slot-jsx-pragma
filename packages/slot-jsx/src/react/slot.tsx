@@ -25,13 +25,11 @@ const Slot = React.forwardRef<HTMLElement, SlotProps>((props, _forwardedRef) => 
 
 interface SlottableProps {
   as?: React.ReactNode | ((props: Record<string, any>) => React.ReactElement);
-  children?: React.ReactNode | ((children: React.ReactNode) => React.ReactNode);
+  children?: React.ReactNode;
 }
 
 function Slottable(props: SlottableProps) {
-  // When not intercepted by the pragma (i.e. not inside a Slot), render appropriately
-  const children = typeof props.as === 'function' ? null : props.as;
-  return typeof props.children === 'function' ? props.children(children) : props.children;
+  return <>{props.children}</>;
 }
 
 /* ---------------------------------------------------------------------------------------------- */

@@ -62,7 +62,9 @@ export const ButtonNestedSlottable = ({
   return (
     <Comp {...props}>
       <span>left</span>
-      <Slottable as={props.children}>{(children) => <b>bold {children}</b>}</Slottable>
+      <b>
+        bold <Slottable>{props.children}</Slottable>
+      </b>
       <span>right</span>
     </Comp>
   );
@@ -77,7 +79,9 @@ export const IconButtonNestedSlottable = ({
     <Client.Button asChild>
       <Comp {...props}>
         <span>ICON</span>
-        <Slottable as={props.children}>{(children) => <b>bold {children}</b>}</Slottable>
+        <b>
+          bold <Slottable>{props.children}</Slottable>
+        </b>
       </Comp>
     </Client.Button>
   );
@@ -109,5 +113,31 @@ export const ButtonRender = ({ render, ...props }: ButtonRenderProps) => {
     <Comp {...props}>
       <Slottable as={render}>{props.children}</Slottable>
     </Comp>
+  );
+};
+
+// IRL this would be typed correctly but we're just testing functionality here
+interface ButtonNestedRenderProps extends React.ComponentProps<'button'> {
+  render?: React.ReactElement | ((props: any) => React.ReactElement);
+}
+
+export const ButtonNestedRender = ({ render, ...props }: ButtonNestedRenderProps) => {
+  const Comp = render ? Slot : 'button';
+  return (
+    <Comp {...props}>
+      <span>ICON</span>
+      <b>
+        bold <Slottable as={render}>{props.children}</Slottable>
+      </b>
+    </Comp>
+  );
+};
+
+// Edge-case: passing props.children to both `as` and Slottable children
+export const ButtonRenderAsChildren = ({ ...props }: React.ComponentProps<'button'>) => {
+  return (
+    <Slot {...props}>
+      <Slottable as={props.children}>{props.children}</Slottable>
+    </Slot>
   );
 };
