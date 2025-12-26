@@ -1,5 +1,11 @@
 # v1.0.2 (Fri Dec 26 2025)
 
+### Release Notes
+
+#### fix nested slottables for render prop pattern [#33](https://github.com/jjenzz/slot-jsx-pragma/pull/33) ([@jjenzz](https://github.com/jjenzz))
+
+🔥 BREAKING CHANGE: removes children-as-function API for nested slottables. this reintroduces the traversal method for finding `Slottable` in tree to enable nested slotting with the `render` prop pattern, while keeping a simple API surface. this has been released as a patch while api is stabilizing.
+
 #### 🐛 Bug Fix
 
 - fix nested slottables for render prop pattern [#33](https://github.com/jjenzz/slot-jsx-pragma/pull/33) ([@jjenzz](https://github.com/jjenzz))
