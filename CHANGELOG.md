@@ -1,3 +1,15 @@
+# v1.0.2 (Fri Dec 26 2025)
+
+#### 🐛 Bug Fix
+
+- fix nested slottables for render prop pattern [#33](https://github.com/jjenzz/slot-jsx-pragma/pull/33) ([@jjenzz](https://github.com/jjenzz))
+
+#### Authors: 1
+
+- Jenna Smith ([@jjenzz](https://github.com/jjenzz))
+
+---
+
 # v1.0.1 (Mon Dec 15 2025)
 
 #### 🏠 Housekeeping
